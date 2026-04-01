@@ -1,50 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>VOSS Reporting Dashboard</title>
+<title>VOSS Reporting</title>
+
 <style>
-body {
-font-family: Arial, sans-serif;
-background:#0f172a;
+body{
+font-family: Arial;
+background:#111;
 color:white;
 text-align:center;
 padding:40px;
 }
 
-.card {
-background:#1e293b;
-padding:20px;
-margin:20px;
-border-radius:10px;
-display:inline-block;
-width:250px;
+input, textarea{
+width:300px;
+padding:10px;
+margin:10px;
+border-radius:5px;
+border:none;
 }
 
-h1 {
-margin-bottom:40px;
+button{
+padding:12px 25px;
+background:#2ecc71;
+border:none;
+color:white;
+font-size:16px;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#27ae60;
 }
 </style>
+
 </head>
 
 <body>
 
-<h1>VOSS Reporting Dashboard</h1>
+<h1>VOSS Reporting</h1>
 <p>Virtual Operating System Synopsis Reporting</p>
 
-<div class="card">
-<h2>Total Reports</h2>
-<p id="reports">0</p>
-</div>
+<h2>Submit Initial Report</h2>
 
-<div class="card">
-<h2>Total Time Saved</h2>
-<p id="time">0 hrs</p>
-</div>
+<form id="reportForm">
 
-<div class="card">
-<h2>Estimated Value</h2>
-<p id="value">$0</p>
-</div>
+<input type="text" id="name" placeholder="Name" required><br>
+
+<input type="text" id="department" placeholder="Department"><br>
+
+<textarea id="issue" placeholder="Describe the issue..." rows="5" required></textarea><br>
+
+<button type="submit">Submit Report</button>
+
+</form>
+
+<p id="status"></p>
+
+<script>
+
+document.getElementById("reportForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+let report = {
+name: document.getElementById("name").value,
+department: document.getElementById("department").value,
+issue: document.getElementById("issue").value,
+time: new Date().toISOString()
+};
+
+console.log(report);
+
+document.getElementById("status").innerText =
+"Report submitted successfully.";
+
+document.getElementById("reportForm").reset();
+
+});
+
+</script>
 
 </body>
 </html>
