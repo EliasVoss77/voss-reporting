@@ -116,6 +116,36 @@ document.getElementById("reportViewer").innerHTML = output;
 
 }
 
+function generateSummary(){
+
+let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
+
+let summary = `
+<h2>VOSS System Summary</h2>
+Total Reports: ${reports.length}<br><br>
+`;
+
+let departments = {};
+
+reports.forEach(function(r){
+
+if(!departments[r.department]){
+departments[r.department] = 0;
+}
+
+departments[r.department]++;
+
+});
+
+summary += "<b>Reports by Department:</b><br>";
+
+for(let d in departments){
+summary += d + ": " + departments[d] + "<br>";
+}
+
+document.getElementById("reportViewer").innerHTML = summary;
+
+}
 </script>
 
 
