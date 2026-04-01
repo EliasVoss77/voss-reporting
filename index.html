@@ -36,6 +36,13 @@ button:hover{
 background:#27ae60;
 }
 
+.report{
+background:#222;
+padding:15px;
+margin:15px;
+border-radius:8px;
+}
+
 </style>
 
 </head>
@@ -62,12 +69,97 @@ background:#27ae60;
 <button type="button" onclick="viewReports()">View Reports</button>
 
 <button type="button" onclick="generateSummary()">VOSS Summary</button>
+
 </form>
 
 <p id="status"></p>
+
 <div id="reportViewer"></div>
 
+<div id="reportOutput"></div>
+
 <script>
+
+document.getElementById("reportForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+let report = {
+name: document.getElementById("name").value,
+department: document.getElementById("department").value,
+issue: document.getElementById("issue").value,
+time: new Date().toISOString()
+};
+
+let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
+
+reports.push(report);
+
+localStorage.setItem("vossReports", JSON.stringify(reports));
+
+document.getElementById("status").innerText =
+"Report submitted successfully.";
+
+document.getElementById("reportForm").reset();
+
+});
+
+
+function viewReports(){
+
+let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
+
+let output = "<h2>Submitted Reports</h2>";
+
+reports.forEach(function(r){
+
+output += `
+<div class="report">
+<b>Name:</b> ${r.name}<br>
+<b>Department:</b> ${r.department}<br>
+<b>Report:</b><br>${r.issue}<br><br>
+<small>${r.time}</small>
+</div>
+`;
+
+});
+
+document.getElementById("reportViewer").innerHTML = output;
+
+}
+
+
+function generateSummary(){
+
+let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
+
+let summary = `
+<h2>VOSS System Summary</h2>
+Total Reports: ${reports.length}<br><br>
+`;
+
+let departments = {};
+
+reports.forEach(function(r){
+
+if(!departments[r.department]){
+departments[r.department] = 0;
+}
+
+departments[r.department]++;
+
+});
+
+summary += "<b>Reports by Department:</b><br>";
+
+for(let d in departments){
+summary += d + ": " + departments[d] + "<br>";
+}
+
+document.getElementById("reportViewer").innerHTML = summary;
+
+}
+
 
 function generateVossSummary(){
 
@@ -106,86 +198,8 @@ Next Steps:
 document.getElementById("reportOutput").innerText = summary;
 
 }
-  
-document.getElementById("reportForm").addEventListener("submit", function(e){
 
-e.preventDefault();
-
-let report = {
-name: document.getElementById("name").value,
-department: document.getElementById("department").value,
-issue: document.getElementById("issue").value,
-time: new Date().toISOString()
-};
-
-let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
-
-reports.push(report);
-
-localStorage.setItem("vossReports", JSON.stringify(reports));
-
-document.getElementById("status").innerText =
-"Report submitted successfully.";
-
-document.getElementById("reportForm").reset();
-
-});
-
-function viewReports(){
-
-let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
-
-let output = "<h2>Submitted Reports</h2>";
-
-reports.forEach(function(r){
-
-output += `
-<div style="background:#222;padding:15px;margin:15px;border-radius:8px;">
-<b>Name:</b> ${r.name}<br>
-<b>Department:</b> ${r.department}<br>
-<b>Report:</b><br>${r.issue}<br><br>
-<small>${r.time}</small>
-</div>
-`;
-
-});
-
-document.getElementById("reportViewer").innerHTML = output;
-
-}
-
-function generateSummary(){
-
-let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
-
-let summary = `
-<h2>VOSS System Summary</h2>
-Total Reports: ${reports.length}<br><br>
-`;
-
-let departments = {};
-
-reports.forEach(function(r){
-
-if(!departments[r.department]){
-departments[r.department] = 0;
-}
-
-departments[r.department]++;
-
-});
-
-summary += "<b>Reports by Department:</b><br>";
-
-for(let d in departments){
-summary += d + ": " + departments[d] + "<br>";
-}
-
-document.getElementById("reportViewer").innerHTML = summary;
-
-}
 </script>
-
 
 </body>
 
