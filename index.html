@@ -93,6 +93,29 @@ document.getElementById("reportForm").reset();
 
 });
 
+function viewReports(){
+
+let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
+
+let output = "<h2>Submitted Reports</h2>";
+
+reports.forEach(function(r){
+
+output += `
+<div style="background:#222;padding:15px;margin:15px;border-radius:8px;">
+<b>Name:</b> ${r.name}<br>
+<b>Department:</b> ${r.department}<br>
+<b>Report:</b><br>${r.issue}<br><br>
+<small>${r.time}</small>
+</div>
+`;
+
+});
+
+document.getElementById("reportViewer").innerHTML = output;
+
+}
+
 </script>
 
 
