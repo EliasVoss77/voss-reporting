@@ -139,23 +139,54 @@ let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
 
 let totalHours = 0;
 let totalValue = 0;
+let totalAIContribution = 0;
+
+let categories = {};
 let combinedText = "";
 
 reports.forEach(function(r){
 
-combinedText += r.issue + " ";
+let text = r.issue;
 
-let hoursMatch = r.issue.match(/(\d+)\s*hours?/i);
+combinedText += text + " ";
+
+let hoursMatch = text.match(/Hours Saved:\s*(\d+)/i);
 if(hoursMatch){
 totalHours += parseInt(hoursMatch[1]);
 }
 
-let valueMatch = r.issue.match(/\$([0-9,]+)/);
+let valueMatch = text.match(/Economic Value:\s*\$?(\d+)/i);
 if(valueMatch){
-totalValue += parseInt(valueMatch[1].replace(/,/g,""));
+totalValue += parseInt(valueMatch[1]);
+}
+
+let aiMatch = text.match(/AI Contribution:\s*(\d+)/i);
+if(aiMatch){
+totalAIContribution += parseInt(aiMatch[1]);
+}
+
+let categoryMatch = text.match(/Task Category:\s*([A-Za-z]+)/i);
+if(categoryMatch){
+
+let cat = categoryMatch[1];
+
+if(!categories[cat]){
+categories[cat] = 0;
+}
+
+categories[cat]++;
+
 }
 
 });
+
+let avgAI = reports.length ? (totalAIContribution / reports.length).toFixed(1) : 0;
+
+let categoryHTML = "";
+
+for(let c in categories){
+categoryHTML += c + ": " + categories[c] + "<br>";
+}
 
 let summary = `
 <h2>VOSS Intelligence Report</h2>
@@ -168,8 +199,14 @@ ${totalHours} hours<br><br>
 <b>Total Economic Value Identified:</b><br>
 $${totalValue.toLocaleString()}<br><br>
 
+<b>Average AI Contribution:</b><br>
+${avgAI}%<br><br>
+
+<b>Task Category Distribution:</b><br>
+${categoryHTML}<br>
+
 <b>Compiled Insight Dataset:</b><br>
-${combinedText.substring(0,800)}...
+${combinedText.substring(0,700)}...
 `;
 
 document.getElementById("summary").innerHTML = summary;
