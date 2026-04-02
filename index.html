@@ -215,7 +215,9 @@ categories[cat]++;
 });
 
 let avgAI = aiCount > 0 ? (totalAI / aiCount).toFixed(1) : 0;
+let avgHuman = humanCount > 0 ? (totalHuman / humanCount).toFixed(1) : 0;
 
+  
 let categoryHTML = "";
 
 for(let c in categories){
