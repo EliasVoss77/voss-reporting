@@ -108,6 +108,8 @@ text: document.getElementById("issue").value
 
 reports.push(report);
 
+localStorage.setItem("vossReports", JSON.stringify(reports));
+
 displayReports();
 
 document.getElementById("reportForm").reset();
