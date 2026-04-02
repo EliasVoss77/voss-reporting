@@ -192,7 +192,7 @@ totalHuman += parseInt(humanMatch[1]);
 humanCount++;
 }
   
-let timeframeMatch = text.match(/\((.*?)\)/);
+let timeframeMatch = text.match(/\((\d+\s*[-–]\s*\d+\s*Months?)\)/i);
 
 if(timeframeMatch){
 timeframeList.push(timeframeMatch[1]);
