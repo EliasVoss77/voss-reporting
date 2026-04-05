@@ -96,180 +96,111 @@ text-align:left;
 <div id="summary"></div>
 
 <script>
-
 let reports = [];
+// REPLACE WITH YOUR ACTUAL WORKER URL
+const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev"; 
+// REPLACE WITH YOUR API KEY (Ideally, store this in a secure env var or use a proxy, but for dev this works)
+const API_KEY = "your-secret-api-key-here"; 
 
-document.getElementById("reportForm").addEventListener("submit", function(e){
-
-e.preventDefault();
-
-let report = {
-name: document.getElementById("name").value,
-department: document.getElementById("department").value,
-text: document.getElementById("issue").value
+window.onload = function() {
+    const saved = localStorage.getItem("vossReports");
+    if (saved) {
+        reports = JSON.parse(saved);
+        displayReports();
+    }
 };
 
-reports.push(report);
-
-localStorage.setItem("vossReports", JSON.stringify(reports));
-
-displayReports();
-
-document.getElementById("reportForm").reset();
-
+document.getElementById("reportForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    let report = {
+        name: document.getElementById("name").value,
+        department: document.getElementById("department").value,
+        text: document.getElementById("issue").value
+    };
+    reports.push(report);
+    localStorage.setItem("vossReports", JSON.stringify(reports));
+    displayReports();
+    document.getElementById("reportForm").reset();
 });
 
 function displayReports(){
-
-let container = document.getElementById("reports");
-
-container.innerHTML = "";
-
-reports.forEach(r => {
-
-container.innerHTML += `
-<div class="report">
-<b>${r.name}</b> - ${r.department}<br><br>
-${r.text.replace(/VOSS REPORT FORMAT[\s\S]*?Task Category:/i,"Task Category:")}
-</div>
-`;
-
-});
-
+    let container = document.getElementById("reports");
+    container.innerHTML = "";
+    reports.forEach(r => {
+        container.innerHTML += `
+        <div class="report">
+            <b>${r.name}</b> - ${r.department}<br><br>
+            <small>${r.text.substring(0, 100)}...</small>
+        </div>`;
+    });
 }
 
-function generateVossReport(){
+async function generateAiReport() {
+    const container = document.getElementById("ai-report-container");
+    const summaryDiv = document.getElementById("summary");
+    
+    if (reports.length === 0) {
+        alert("No reports to analyze.");
+        return;
+    }
 
-let reports = JSON.parse(localStorage.getItem("vossReports")) || [];
+    container.innerHTML = "<p>🤖 Analyzing with AI...</p>";
+    summaryDiv.innerHTML = "";
 
-let totalHours = 0;
-let totalValue = 0;
-let totalBusinessValue = 0;
+    try {
+        // We will analyze the LAST report added for now, or loop through all
+        // Let's analyze the most recent one first to test
+        const latestReport = reports[reports.length - 1];
 
-let totalAI = 0;
-let aiCount = 0;
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": API_KEY
+            },
+            body: JSON.stringify({ chat: latestReport.text })
+        });
 
-let totalHuman = 0;
-let humanCount = 0;
+        if (!response.ok) throw new Error("Worker Error: " + response.statusText);
 
-let timeframeList = [];
+        const data = await response.json();
 
-let categories = {};
+        // data is now the parsed JSON object from the worker
+        // Example: { tasks: [...], hoursSaved: 5, ... }
 
-reports.forEach(function(r){
+        // Format the data into HTML
+        const html = `
+            <h2>VOSS Analysis Report</h2>
+            <p><strong>Source:</strong> $${latestReport.name} ($${latestReport.department})</p>
+            <hr>
+            <p><strong>Tasks Identified:</strong> ${data.tasks.join(", ") || "None detected"}</p>
+            <p><strong>Hours Saved:</strong> ${data.hoursSaved}</p>
+            <p><strong>Economic Value:</strong> $${data.economicValue}</p>
+            <p><strong>Projected Value:</strong> ${data.projectedValue}</p>
+            <p><strong>AI Contribution:</strong> ${data.aiContribution}</p>
+            <p><strong>Human Contribution:</strong> ${data.humanContribution}</p>
+            <p><strong>Category:</strong> ${data.category || "Uncategorized"}</p>
+        `;
 
-let text = r.text;
+        summaryDiv.innerHTML = html;
+        container.innerHTML = "<p>✅ Analysis Complete!</p>";
 
-// HOURS SAVED
-let hoursMatch = text.match(/Hours Saved:\s*(\d+)/i);
-if(hoursMatch){
-totalHours += parseInt(hoursMatch[1]);
-}
-
-// ECONOMIC VALUE
-let valueMatch = text.match(/Economic Value:\s*\$?([\d,]+)/i) || 
-                 text.match(/Projected Economic Value:\s*\$?([\d,]+)/i);
-
-let businessMatch = text.match(/Projected Business or Organizational Value:\s*\$?([\d,]+)/i);
-
-if(businessMatch){
-totalBusinessValue += parseInt(businessMatch[1].replace(/,/g,""));
-}
-  
-if(valueMatch){
-totalValue += parseInt(valueMatch[1].replace(/,/g,""));
-}
-
-// AI CONTRIBUTION
-let aiMatch = text.match(/AI Contribution:\s*(\d+)/i);
-
-if(aiMatch){
-totalAI += parseInt(aiMatch[1]);
-aiCount++;
-}
-
-let humanMatch = text.match(/Human Contribution:\s*(\d+)/i);
-
-if(humanMatch){
-totalHuman += parseInt(humanMatch[1]);
-humanCount++;
-}
-  
-let timeframeMatch = text.match(/\((\d+\s*[-–]\s*\d+\s*Months?)\)/i);
-
-if(timeframeMatch){
-timeframeList.push(timeframeMatch[1]);
-}
-  
-
-// CATEGORY
-let catMatch = text.match(/Task Category:\s*([A-Za-z]+)/i);
-
-if(catMatch){
-let cat = catMatch[1];
-
-if(!categories[cat]){
-categories[cat] = 0;
-}
-
-categories[cat]++;
-}
-
-});
-
-let avgAI = aiCount > 0 ? (totalAI / aiCount).toFixed(1) : 0;
-let avgHuman = humanCount > 0 ? (totalHuman / humanCount).toFixed(1) : 0;
-
-  
-let categoryHTML = "";
-
-for(let c in categories){
-categoryHTML += c + ": " + categories[c] + "<br>";
-}
-
-let summary = `
-<h2>VOSS Intelligence Report</h2>
-
-<b>Reports analyzed:</b> ${reports.length}<br><br>
-
-<b>Total Productivity Hours Saved:</b><br>
-${totalHours} hours<br><br>
-
-<b>Total Economic Value Identified:</b><br>
-$${totalValue.toLocaleString()}<br><br>
-
-<b>Total Business / Organizational Value:</b><br>
-$${totalBusinessValue.toLocaleString()}<br><br>
-
-<b>Average AI Contribution:</b><br>
-${avgAI}%<br><br>
-
-<b>Average Human Contribution:</b><br>
-${avgHuman}%<br><br>
-
-<b>Observed Value Timeframes:</b><br>
-${timeframeList.join(", ")}<br><br>
-
-<b>Task Category Distribution:</b><br>
-${categoryHTML}
-`;
-
-document.getElementById("summary").innerHTML = summary;
-
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = `<p style="color:red;">❌ Error: ${error.message}</p>`;
+    }
 }
 
 function clearReports(){
-
-reports = [];
-
-document.getElementById("reports").innerHTML = "";
-
-document.getElementById("summary").innerHTML = "";
-
+    if(confirm("Clear all data?")) {
+        reports = [];
+        localStorage.removeItem("vossReports");
+        displayReports();
+        document.getElementById("summary").innerHTML = "";
+        document.getElementById("ai-report-container").innerHTML = "";
+    }
 }
-
 </script>
-
 </body>
 
 </html>
