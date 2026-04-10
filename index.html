@@ -581,7 +581,10 @@
         body: JSON.stringify({ chat: latestReport.text })
       });
 
-      if (!response.ok) throw new Error("Worker responded with " + response.status);
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error("Worker " + response.status + ": " + errText.substring(0, 200));
+      }
 
       const data = await response.json();
 
