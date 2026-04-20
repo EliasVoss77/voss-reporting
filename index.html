@@ -88,41 +88,6 @@
     font-family: 'Share Tech Mono', monospace;
   }
 
-  /* Nav tabs */
-  .nav-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 28px;
-  }
-
-  .nav-tab {
-    padding: 10px 20px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.2s;
-  }
-
-  .nav-tab.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,255,136,0.05);
-  }
-
-  .nav-tab:hover:not(.active) {
-    border-color: var(--muted);
-    color: var(--text);
-  }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -366,68 +331,6 @@
     margin-top: 12px;
   }
 
-  /* Admin styles */
-  .admin-report {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 3px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-
-  .admin-report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .admin-name { font-weight: 700; font-size: 1.1rem; }
-  .admin-dept { font-size: 0.75rem; color: var(--accent2); font-family: 'Share Tech Mono', monospace; }
-  .admin-date { font-size: 0.7rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
-
-  .admin-stats {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-  }
-
-  .admin-stat { font-size: 0.85rem; }
-  .admin-stat span { color: var(--accent); font-weight: 700; }
-
-  .admin-category {
-    display: inline-block;
-    padding: 3px 8px;
-    background: rgba(0,200,255,0.08);
-    border: 1px solid rgba(0,200,255,0.2);
-    border-radius: 2px;
-    font-size: 0.75rem;
-    color: var(--accent2);
-    font-family: 'Share Tech Mono', monospace;
-    margin-bottom: 8px;
-  }
-
-  .admin-tasks { font-size: 0.8rem; color: var(--muted); }
-
-  .admin-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  .summary-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 16px;
-    text-align: center;
-  }
-
   .empty-state {
     text-align: center;
     padding: 30px;
@@ -451,6 +354,10 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
   }
+
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.2s; }
+  .card:nth-child(4) { animation-delay: 0.3s; }
 </style>
 </head>
 <body>
@@ -466,102 +373,68 @@
     <p class="subtitle">Virtual Operating System Synopsis Reporting</p>
   </header>
 
-  <!-- Nav Tabs -->
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('submit')">⚡ Submit Report</button>
-    <button class="nav-tab" onclick="switchTab('admin')">📊 Admin Dashboard</button>
+  <div class="card">
+    <div class="card-title">Submit Report</div>
+    <form id="reportForm">
+      <div class="form-row">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="department" placeholder="Department — Position">
+      </div>
+      <textarea id="issue" placeholder="Paste chat transcript here..." required></textarea>
+      <button type="submit" class="btn btn-primary">Submit Report</button>
+    </form>
   </div>
 
-  <!-- Submit Tab -->
-  <div id="tab-submit" class="tab-content active">
-
-    <div class="card">
-      <div class="card-title">Submit Report</div>
-      <form id="reportForm">
-        <div class="form-row">
-          <input type="text" id="name" placeholder="Name" required>
-          <input type="text" id="department" placeholder="Department — Position">
-        </div>
-        <textarea id="issue" placeholder="Paste chat transcript here..." required></textarea>
-        <button type="submit" class="btn btn-primary">Submit Report</button>
-      </form>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-secondary" onclick="generateAiReport()">⚡ VOSS Value Report</button>
-      <button class="btn btn-ghost" onclick="clearReports()">✕ Clear Session</button>
-    </div>
-
-    <div id="status-bar">
-      <div class="status-dot"></div>
-      <span id="status-text">System ready — submit a report to begin</span>
-    </div>
-
-    <div id="analysis-output" class="card">
-      <div class="card-title">VOSS Analysis</div>
-      <div class="analysis-grid">
-        <div class="stat-box">
-          <div class="stat-label">Hours Saved</div>
-          <div class="stat-value" id="out-hours">—</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Economic Value</div>
-          <div class="stat-value blue" id="out-value">—</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Projected Value</div>
-          <div class="stat-value" id="out-projected">—</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Category</div>
-          <div class="stat-value blue" style="font-size:1rem;" id="out-category">—</div>
-        </div>
-      </div>
-      <div class="tasks-section">
-        <div class="tasks-label">Tasks Identified</div>
-        <div id="out-tasks"></div>
-      </div>
-      <div class="contrib-row">
-        <div class="contrib-box">
-          <div class="stat-label">AI Contribution</div>
-          <div class="stat-value" id="out-ai">—</div>
-        </div>
-        <div class="contrib-box">
-          <div class="stat-label">Human Contribution</div>
-          <div class="stat-value blue" id="out-human">—</div>
-        </div>
-      </div>
-      <div class="analysis-source" id="out-source"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Submitted Reports</div>
-      <div id="reports"><div class="empty-state">[ NO REPORTS THIS SESSION ]</div></div>
-    </div>
-
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="generateAiReport()">⚡ VOSS Value Report</button>
+    <button class="btn btn-ghost" onclick="clearReports()">✕ Clear Session</button>
   </div>
 
-  <!-- Admin Tab -->
-  <div id="tab-admin" class="tab-content">
-    <div class="card">
-      <div class="card-title">Admin Dashboard</div>
-      <div class="admin-summary">
-        <div class="summary-box">
-          <div class="stat-label">Total Reports</div>
-          <div class="stat-value" id="admin-total">—</div>
-        </div>
-        <div class="summary-box">
-          <div class="stat-label">Total Hours Saved</div>
-          <div class="stat-value" id="admin-hours">—</div>
-        </div>
-        <div class="summary-box">
-          <div class="stat-label">Total Economic Value</div>
-          <div class="stat-value blue" id="admin-value">—</div>
-        </div>
+  <div id="status-bar">
+    <div class="status-dot"></div>
+    <span id="status-text">System ready — submit a report to begin</span>
+  </div>
+
+  <div id="analysis-output" class="card">
+    <div class="card-title">VOSS Analysis</div>
+    <div class="analysis-grid">
+      <div class="stat-box">
+        <div class="stat-label">Hours Saved</div>
+        <div class="stat-value" id="out-hours">—</div>
       </div>
-      <button class="btn btn-secondary" style="width:100%;margin-bottom:20px;" onclick="loadAdminReports()">🔄 Load All Reports</button>
-      <div id="admin-reports"><div class="empty-state">[ CLICK LOAD TO FETCH ALL REPORTS ]</div></div>
+      <div class="stat-box">
+        <div class="stat-label">Economic Value</div>
+        <div class="stat-value blue" id="out-value">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Projected Value</div>
+        <div class="stat-value" id="out-projected">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Category</div>
+        <div class="stat-value blue" style="font-size:1rem;" id="out-category">—</div>
+      </div>
     </div>
+    <div class="tasks-section">
+      <div class="tasks-label">Tasks Identified</div>
+      <div id="out-tasks"></div>
+    </div>
+    <div class="contrib-row">
+      <div class="contrib-box">
+        <div class="stat-label">AI Contribution</div>
+        <div class="stat-value" id="out-ai">—</div>
+      </div>
+      <div class="contrib-box">
+        <div class="stat-label">Human Contribution</div>
+        <div class="stat-value blue" id="out-human">—</div>
+      </div>
+    </div>
+    <div class="analysis-source" id="out-source"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Submitted Reports</div>
+    <div id="reports"><div class="empty-state">[ NO REPORTS THIS SESSION ]</div></div>
   </div>
 
 </div>
@@ -583,13 +456,6 @@
       displayReports();
     }
   };
-
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    event.target.classList.add('active');
-  }
 
   function setStatus(msg, type = "") {
     const bar = document.getElementById("status-bar");
@@ -683,61 +549,6 @@
     } catch (err) {
       console.error(err);
       setStatus("Error: " + err.message, "error");
-    }
-  }
-
-  async function loadAdminReports() {
-    const container = document.getElementById("admin-reports");
-    container.innerHTML = '<div class="empty-state">[ LOADING... ]</div>';
-
-    try {
-      const response = await fetch(WORKER_URL + "/admin", {
-        method: "GET",
-        headers: { "x-api-key": API_KEY }
-      });
-
-      if (!response.ok) throw new Error("Failed to load reports");
-
-      const data = await response.json();
-
-      if (data.length === 0) {
-        container.innerHTML = '<div class="empty-state">[ NO REPORTS IN DATABASE YET ]</div>';
-        return;
-      }
-
-      // Update summary stats
-      const totalHours = data.reduce((sum, r) => sum + (r.hours_saved || 0), 0);
-      const totalValue = data.reduce((sum, r) => sum + (r.economic_value || 0), 0);
-      document.getElementById("admin-total").textContent = data.length;
-      document.getElementById("admin-hours").textContent = totalHours.toFixed(1);
-      document.getElementById("admin-value").textContent = "$" + totalValue.toLocaleString();
-
-      container.innerHTML = "";
-      data.forEach(r => {
-        const tasks = JSON.parse(r.tasks || "[]");
-        const date = new Date(r.created_at).toLocaleDateString();
-        container.innerHTML += `
-          <div class="admin-report">
-            <div class="admin-report-header">
-              <div>
-                <div class="admin-name">${r.name}</div>
-                <div class="admin-dept">${r.department}</div>
-              </div>
-              <div class="admin-date">${date}</div>
-            </div>
-            <div class="admin-category">${r.category}</div>
-            <div class="admin-stats">
-              <div class="admin-stat">Hours Saved: <span>${r.hours_saved}</span></div>
-              <div class="admin-stat">Economic Value: <span>$${(r.economic_value || 0).toLocaleString()}</span></div>
-              <div class="admin-stat">AI: <span>${r.ai_contribution}</span></div>
-              <div class="admin-stat">Human: <span>${r.human_contribution}</span></div>
-            </div>
-            <div class="admin-tasks">Tasks: ${tasks.join(" • ") || "None"}</div>
-          </div>`;
-      });
-
-    } catch (err) {
-      container.innerHTML = `<div class="empty-state" style="color:var(--danger);">Error: ${err.message}</div>`;
     }
   }
 
