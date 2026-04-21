@@ -219,73 +219,79 @@
   .contrib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .contrib-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 14px; text-align: center; }
 
-  /* Section 2 - Task Ledger */
-  .ledger-table { width: 100%; border-collapse: collapse; }
-  .ledger-table th {
+  .analysis-source {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+
+  /* Section 2 - Chat Recap */
+  .chat-recap {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Section 3 - Action Priority */
+  .action-table-header {
+    display: grid;
+    grid-template-columns: 24px 1fr 90px 100px 80px;
+    gap: 12px;
+    padding: 0 16px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+
+  .action-col-label {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.62rem;
     letter-spacing: 0.15em;
     color: var(--muted);
     text-transform: uppercase;
-    padding: 8px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
   }
 
-  .ledger-table td {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
+  @media (max-width: 600px) {
+    .action-table-header { grid-template-columns: 24px 1fr 70px 80px; }
+    .action-table-header .action-col-label:last-child { display: none; }
   }
 
-  .ledger-table tr:last-child td { border-bottom: none; }
-  .ledger-table tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .ledger-rank {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-    width: 30px;
-  }
-
-  .ledger-value { color: var(--accent); font-weight: 700; font-family: 'Share Tech Mono', monospace; white-space: nowrap; }
-  .ledger-hours { color: var(--accent2); font-family: 'Share Tech Mono', monospace; white-space: nowrap; }
-
-  .confidence {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 2px;
-    font-size: 0.7rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-weight: 700;
-  }
-
-  .confidence-High { background: rgba(0,255,136,0.1); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
-  .confidence-Medium { background: rgba(240,180,41,0.1); color: var(--yellow); border: 1px solid rgba(240,180,41,0.2); }
-  .confidence-Low { background: rgba(255,77,109,0.1); color: var(--danger); border: 1px solid rgba(255,77,109,0.2); }
-
-  /* Section 3 - Action Priority */
   .action-item {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 3px;
-    padding: 16px;
+    padding: 14px 16px;
     margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .action-item:hover { border-color: var(--muted); }
+
+  .action-item.status-Complete { border-left: 3px solid var(--accent); }
+  .action-item.status-In-Progress { border-left: 3px solid var(--yellow); }
+  .action-item.status-Planned { border-left: 3px solid var(--danger); }
+
+  .action-main {
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 14px;
+    grid-template-columns: 24px 1fr 90px 100px 80px;
+    gap: 12px;
     align-items: start;
+  }
+
+  @media (max-width: 600px) {
+    .action-main { grid-template-columns: 24px 1fr 70px 80px; }
   }
 
   .action-light {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    margin-top: 3px;
+    margin-top: 4px;
     flex-shrink: 0;
-    cursor: pointer;
-    transition: all 0.2s;
     box-shadow: 0 0 8px currentColor;
   }
 
@@ -293,27 +299,41 @@
   .light-In-Progress { background: var(--yellow); color: var(--yellow); }
   .light-Planned { background: var(--danger); color: var(--danger); }
 
-  .action-content { flex: 1; }
-  .action-text { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
-  .action-rationale { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+  .action-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
+  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  .action-hours {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent2);
+    font-weight: 700;
+    text-align: right;
+    padding-top: 2px;
+  }
 
   .action-value {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.85rem;
     color: var(--accent);
     font-weight: 700;
-    white-space: nowrap;
     text-align: right;
+    padding-top: 2px;
   }
 
-  .status-toggle {
+  .action-controls {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
     display: flex;
-    gap: 6px;
-    margin-top: 8px;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
   }
+
+  .status-toggle { display: flex; gap: 6px; flex-shrink: 0; }
 
   .status-btn {
-    padding: 3px 8px;
+    padding: 3px 10px;
     border-radius: 2px;
     font-size: 0.65rem;
     font-family: 'Share Tech Mono', monospace;
@@ -330,14 +350,25 @@
   .status-btn.active-In-Progress { background: rgba(240,180,41,0.1); color: var(--yellow); border-color: var(--yellow); }
   .status-btn.active-Planned { background: rgba(255,77,109,0.1); color: var(--danger); border-color: var(--danger); }
 
-  .analysis-source {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    padding: 10px 0 0;
-    border-top: 1px solid var(--border);
-    margin-top: 4px;
+  .notes-field {
+    flex: 1;
+    min-width: 200px;
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    resize: none;
+    height: 32px;
+    overflow: hidden;
+    transition: border-color 0.2s, height 0.2s;
+    outline: none;
   }
+
+  .notes-field::placeholder { color: var(--muted); font-size: 0.8rem; }
+  .notes-field:focus { border-color: var(--accent2); height: 64px; }
 
   .empty-state {
     text-align: center;
@@ -429,26 +460,22 @@
     <div class="analysis-source" id="out-source"></div>
   </div>
 
-  <!-- Section 2: Task Ledger -->
-  <div id="section-ledger" class="card" style="display:none;">
-    <div class="card-title">Section 2 — Task Ledger</div>
-    <table class="ledger-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Task</th>
-          <th>Hours</th>
-          <th>Value</th>
-          <th>Confidence</th>
-        </tr>
-      </thead>
-      <tbody id="out-ledger"></tbody>
-    </table>
+  <!-- Section 2: Chat Recap -->
+  <div id="section-recap" class="card" style="display:none;">
+    <div class="card-title">Section 2 — Chat Summary</div>
+    <p class="chat-recap" id="out-recap"></p>
   </div>
 
   <!-- Section 3: Action Priority List -->
   <div id="section-actions" class="card" style="display:none;">
     <div class="card-title">Section 3 — Action Priority List</div>
+    <div class="action-table-header">
+      <div class="action-col-label"></div>
+      <div class="action-col-label">Task / Action</div>
+      <div class="action-col-label" style="text-align:right;">Hrs Saved</div>
+      <div class="action-col-label" style="text-align:right;">Value</div>
+      <div class="action-col-label" style="text-align:right;">Status</div>
+    </div>
     <div id="out-actions"></div>
   </div>
 
@@ -469,6 +496,7 @@
   const API_KEY = "voss-dk7x-2f9m-q372";
 
   let reports = [];
+  let actionNotes = {};
 
   window.onload = function() {
     const saved = localStorage.getItem("vossReports");
@@ -476,6 +504,8 @@
       reports = JSON.parse(saved);
       displayReports();
     }
+    const savedNotes = localStorage.getItem("vossActionNotes");
+    if (savedNotes) actionNotes = JSON.parse(savedNotes);
   };
 
   function setStatus(msg, type = "") {
@@ -525,7 +555,7 @@
 
     setStatus("Analyzing with VOSS AI...", "loading");
     document.getElementById("section-summary").style.display = "none";
-    document.getElementById("section-ledger").style.display = "none";
+    document.getElementById("section-recap").style.display = "none";
     document.getElementById("section-actions").style.display = "none";
 
     try {
@@ -551,8 +581,8 @@
 
       const data = await response.json();
       const summary = data.summary || {};
-      const taskLedger = data.taskLedger || [];
-      const actionPriority = data.actionPriority || [];
+      const chatRecap = data.chatRecap || "";
+      const actionItems = data.actionItems || [];
 
       // Section 1 - Summary
       document.getElementById("out-hours").textContent = summary.hoursSaved ?? "—";
@@ -565,43 +595,48 @@
       document.getElementById("out-source").textContent = `Source: ${latestReport.name} — ${latestReport.department}`;
       document.getElementById("section-summary").style.display = "block";
 
-      // Section 2 - Task Ledger
-      const ledgerBody = document.getElementById("out-ledger");
-      ledgerBody.innerHTML = "";
-      taskLedger.forEach((t, i) => {
-        ledgerBody.innerHTML += `
-          <tr>
-            <td class="ledger-rank">${i + 1}</td>
-            <td>${t.task}</td>
-            <td class="ledger-hours">${t.hoursSaved}h</td>
-            <td class="ledger-value">${t.projectedValue}</td>
-            <td><span class="confidence confidence-${t.confidence}">${t.confidence}</span></td>
-          </tr>`;
-      });
-      document.getElementById("section-ledger").style.display = "block";
+      // Section 2 - Chat Recap
+      document.getElementById("out-recap").textContent = chatRecap;
+      document.getElementById("section-recap").style.display = "block";
 
       // Section 3 - Action Priority
       const actionsEl = document.getElementById("out-actions");
       actionsEl.innerHTML = "";
-      actionPriority.forEach((a, i) => {
+
+      actionItems.forEach((a, i) => {
         const statusClass = a.status.replace(" ", "-");
+        const savedNote = actionNotes[`action-note-${i}`] || "";
+
         actionsEl.innerHTML += `
-          <div class="action-item" id="action-${i}">
-            <div class="action-light light-${statusClass}" title="${a.status}"></div>
-            <div class="action-content">
-              <div class="action-text">${a.action}</div>
-              <div class="action-rationale">${a.rationale}</div>
+          <div class="action-item status-${statusClass}" id="action-${i}">
+            <div class="action-main">
+              <div class="action-light light-${statusClass}" id="light-${i}"></div>
+              <div>
+                <div class="action-text">${a.action}</div>
+                <div class="action-rationale">${a.rationale}</div>
+              </div>
+              <div class="action-hours">${a.hoursSaved}h</div>
+              <div class="action-value">${a.projectedValue}</div>
+              <div></div>
+            </div>
+            <div class="action-controls">
               <div class="status-toggle">
                 <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
                 <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡 In Progress</button>
                 <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴 Planned</button>
               </div>
+              <textarea
+                class="notes-field"
+                id="action-note-${i}"
+                placeholder="Add notes..."
+                onchange="saveNote(${i})"
+                onkeyup="saveNote(${i})"
+              >${savedNote}</textarea>
             </div>
-            <div class="action-value">${a.projectedValue}</div>
           </div>`;
       });
-      document.getElementById("section-actions").style.display = "block";
 
+      document.getElementById("section-actions").style.display = "block";
       setStatus("Analysis complete — saved to database ✓", "success");
 
     } catch (err) {
@@ -615,11 +650,11 @@
     const item = document.getElementById("action-" + index);
     if (!item) return;
 
-    // Update light
-    const light = item.querySelector(".action-light");
+    item.className = "action-item status-" + statusClass;
+
+    const light = document.getElementById("light-" + index);
     light.className = "action-light light-" + statusClass;
 
-    // Update buttons
     const buttons = item.querySelectorAll(".status-btn");
     buttons.forEach(btn => {
       btn.className = "status-btn";
@@ -633,13 +668,23 @@
     });
   }
 
+  function saveNote(index) {
+    const noteEl = document.getElementById("action-note-" + index);
+    if (noteEl) {
+      actionNotes["action-note-" + index] = noteEl.value;
+      localStorage.setItem("vossActionNotes", JSON.stringify(actionNotes));
+    }
+  }
+
   function clearReports() {
     if (confirm("Clear all session data?")) {
       reports = [];
+      actionNotes = {};
       localStorage.removeItem("vossReports");
+      localStorage.removeItem("vossActionNotes");
       displayReports();
       document.getElementById("section-summary").style.display = "none";
-      document.getElementById("section-ledger").style.display = "none";
+      document.getElementById("section-recap").style.display = "none";
       document.getElementById("section-actions").style.display = "none";
       setStatus("Session cleared", "");
     }
