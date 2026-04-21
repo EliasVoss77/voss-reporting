@@ -14,6 +14,7 @@
     --accent: #00ff88;
     --accent2: #00c8ff;
     --danger: #ff4d6d;
+    --yellow: #f0b429;
     --text: #e6edf3;
     --muted: #7d8590;
     --glow: 0 0 20px rgba(0,255,136,0.15);
@@ -42,7 +43,7 @@
   }
 
   .container {
-    max-width: 860px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 40px 20px 80px;
     position: relative;
@@ -63,14 +64,8 @@
     margin-bottom: 8px;
   }
 
-  .logo-bar {
-    height: 2px;
-    width: 60px;
-    background: linear-gradient(90deg, transparent, var(--accent));
-  }
-  .logo-bar.right {
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
+  .logo-bar { height: 2px; width: 60px; background: linear-gradient(90deg, transparent, var(--accent)); }
+  .logo-bar.right { background: linear-gradient(90deg, var(--accent), transparent); }
 
   h1 {
     font-family: 'Share Tech Mono', monospace;
@@ -120,12 +115,7 @@
     gap: 10px;
   }
 
-  .card-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
   .form-row {
     display: grid;
@@ -134,9 +124,7 @@
     margin-bottom: 12px;
   }
 
-  @media (max-width: 520px) {
-    .form-row { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
 
   input, textarea {
     width: 100%;
@@ -152,11 +140,7 @@
   }
 
   input::placeholder, textarea::placeholder { color: var(--muted); font-size: 0.9rem; }
-  input:focus, textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,255,136,0.08);
-  }
-
+  input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,255,136,0.08); }
   textarea { resize: vertical; min-height: 120px; margin-bottom: 12px; }
 
   .btn {
@@ -171,37 +155,15 @@
     text-transform: uppercase;
   }
 
-  .btn-primary {
-    background: var(--accent);
-    color: #000;
-    width: 100%;
-    font-weight: 700;
-  }
-
-  .btn-primary:hover {
-    background: #00e07a;
-    box-shadow: var(--glow);
-    transform: translateY(-1px);
-  }
+  .btn-primary { background: var(--accent); color: #000; width: 100%; font-weight: 700; }
+  .btn-primary:hover { background: #00e07a; box-shadow: var(--glow); transform: translateY(-1px); }
 
   .btn-row { display: flex; gap: 10px; margin-bottom: 24px; }
 
-  .btn-secondary {
-    flex: 1;
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-  }
-
+  .btn-secondary { flex: 1; background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   .btn-secondary:hover { background: rgba(0,200,255,0.08); }
 
-  .btn-ghost {
-    flex: 1;
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-
+  .btn-ghost { flex: 1; background: transparent; color: var(--muted); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
 
   #status-bar {
@@ -224,13 +186,7 @@
   #status-bar.error { border-color: var(--danger); color: var(--danger); }
   #status-bar.loading { border-color: var(--accent2); color: var(--accent2); }
 
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: currentColor;
-    flex-shrink: 0;
-  }
-
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
   .loading .status-dot { animation: pulse 1s infinite; }
 
   .report-item {
@@ -240,87 +196,139 @@
     border-radius: 3px;
     padding: 14px 16px;
     margin-bottom: 10px;
-    animation: fadeUp 0.3s ease both;
   }
 
-  .report-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-
-  .report-name { font-weight: 700; font-size: 1rem; color: var(--text); }
+  .report-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .report-name { font-weight: 700; font-size: 1rem; }
   .report-dept { font-size: 0.75rem; color: var(--accent2); font-family: 'Share Tech Mono', monospace; }
   .report-preview { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
 
-  #analysis-output { display: none; }
-
-  .analysis-grid {
+  /* Section 1 - Summary */
+  .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
-  .stat-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 16px;
-    text-align: center;
-  }
-
-  .stat-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    font-family: 'Share Tech Mono', monospace;
-    margin-bottom: 8px;
-  }
-
-  .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 16px; text-align: center; }
+  .stat-label { font-size: 0.62rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; font-family: 'Share Tech Mono', monospace; margin-bottom: 8px; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
   .stat-value.blue { color: var(--accent2); }
 
-  .tasks-section {
+  .contrib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .contrib-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 14px; text-align: center; }
+
+  /* Section 2 - Task Ledger */
+  .ledger-table { width: 100%; border-collapse: collapse; }
+  .ledger-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ledger-table td {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .ledger-table tr:last-child td { border-bottom: none; }
+  .ledger-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .ledger-rank {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    width: 30px;
+  }
+
+  .ledger-value { color: var(--accent); font-weight: 700; font-family: 'Share Tech Mono', monospace; white-space: nowrap; }
+  .ledger-hours { color: var(--accent2); font-family: 'Share Tech Mono', monospace; white-space: nowrap; }
+
+  .confidence {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+  }
+
+  .confidence-High { background: rgba(0,255,136,0.1); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
+  .confidence-Medium { background: rgba(240,180,41,0.1); color: var(--yellow); border: 1px solid rgba(240,180,41,0.2); }
+  .confidence-Low { background: rgba(255,77,109,0.1); color: var(--danger); border: 1px solid rgba(255,77,109,0.2); }
+
+  /* Section 3 - Action Priority */
+  .action-item {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 16px;
-    margin-bottom: 12px;
-  }
-
-  .tasks-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    font-family: 'Share Tech Mono', monospace;
     margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: start;
   }
 
-  .task-tag {
-    display: inline-block;
-    padding: 4px 10px;
-    background: rgba(0,255,136,0.08);
-    border: 1px solid rgba(0,255,136,0.2);
-    border-radius: 2px;
-    font-size: 0.8rem;
-    color: var(--accent);
-    margin: 3px;
+  .action-light {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-top: 3px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .light-Complete { background: var(--accent); color: var(--accent); }
+  .light-In-Progress { background: var(--yellow); color: var(--yellow); }
+  .light-Planned { background: var(--danger); color: var(--danger); }
+
+  .action-content { flex: 1; }
+  .action-text { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .action-rationale { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  .action-value {
     font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 700;
+    white-space: nowrap;
+    text-align: right;
   }
 
-  .contrib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .status-toggle {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
 
-  .contrib-box {
-    background: var(--surface2);
+  .status-btn {
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-size: 0.65rem;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
     border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 14px;
-    text-align: center;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
   }
+
+  .status-btn:hover { color: var(--text); border-color: var(--muted); }
+  .status-btn.active-Complete { background: rgba(0,255,136,0.1); color: var(--accent); border-color: var(--accent); }
+  .status-btn.active-In-Progress { background: rgba(240,180,41,0.1); color: var(--yellow); border-color: var(--yellow); }
+  .status-btn.active-Planned { background: rgba(255,77,109,0.1); color: var(--danger); border-color: var(--danger); }
 
   .analysis-source {
     font-size: 0.75rem;
@@ -328,7 +336,7 @@
     font-family: 'Share Tech Mono', monospace;
     padding: 10px 0 0;
     border-top: 1px solid var(--border);
-    margin-top: 12px;
+    margin-top: 4px;
   }
 
   .empty-state {
@@ -340,24 +348,9 @@
     letter-spacing: 0.1em;
   }
 
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .card:nth-child(2) { animation-delay: 0.1s; }
-  .card:nth-child(3) { animation-delay: 0.2s; }
-  .card:nth-child(4) { animation-delay: 0.3s; }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 </style>
 </head>
 <body>
@@ -373,6 +366,7 @@
     <p class="subtitle">Virtual Operating System Synopsis Reporting</p>
   </header>
 
+  <!-- Submit Report -->
   <div class="card">
     <div class="card-title">Submit Report</div>
     <form id="reportForm">
@@ -385,39 +379,42 @@
     </form>
   </div>
 
+  <!-- Actions -->
   <div class="btn-row">
     <button class="btn btn-secondary" onclick="generateAiReport()">⚡ VOSS Value Report</button>
     <button class="btn btn-ghost" onclick="clearReports()">✕ Clear Session</button>
   </div>
 
+  <!-- Status -->
   <div id="status-bar">
     <div class="status-dot"></div>
     <span id="status-text">System ready — submit a report to begin</span>
   </div>
 
-  <div id="analysis-output" class="card">
-    <div class="card-title">VOSS Analysis</div>
-    <div class="analysis-grid">
+  <!-- Section 1: Time & Value Summary -->
+  <div id="section-summary" class="card" style="display:none;">
+    <div class="card-title">Section 1 — Time & Value Summary</div>
+    <div class="summary-grid">
       <div class="stat-box">
         <div class="stat-label">Hours Saved</div>
         <div class="stat-value" id="out-hours">—</div>
       </div>
       <div class="stat-box">
+        <div class="stat-label">Cost Basis</div>
+        <div class="stat-value blue" id="out-cost">—</div>
+      </div>
+      <div class="stat-box">
         <div class="stat-label">Economic Value</div>
-        <div class="stat-value blue" id="out-value">—</div>
+        <div class="stat-value" id="out-value">—</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Projected Value</div>
-        <div class="stat-value" id="out-projected">—</div>
+        <div class="stat-value blue" id="out-projected">—</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Category</div>
-        <div class="stat-value blue" style="font-size:1rem;" id="out-category">—</div>
+        <div class="stat-value blue" style="font-size:0.95rem;" id="out-category">—</div>
       </div>
-    </div>
-    <div class="tasks-section">
-      <div class="tasks-label">Tasks Identified</div>
-      <div id="out-tasks"></div>
     </div>
     <div class="contrib-row">
       <div class="contrib-box">
@@ -432,6 +429,30 @@
     <div class="analysis-source" id="out-source"></div>
   </div>
 
+  <!-- Section 2: Task Ledger -->
+  <div id="section-ledger" class="card" style="display:none;">
+    <div class="card-title">Section 2 — Task Ledger</div>
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Task</th>
+          <th>Hours</th>
+          <th>Value</th>
+          <th>Confidence</th>
+        </tr>
+      </thead>
+      <tbody id="out-ledger"></tbody>
+    </table>
+  </div>
+
+  <!-- Section 3: Action Priority List -->
+  <div id="section-actions" class="card" style="display:none;">
+    <div class="card-title">Section 3 — Action Priority List</div>
+    <div id="out-actions"></div>
+  </div>
+
+  <!-- Submitted Reports -->
   <div class="card">
     <div class="card-title">Submitted Reports</div>
     <div id="reports"><div class="empty-state">[ NO REPORTS THIS SESSION ]</div></div>
@@ -503,7 +524,9 @@
     }
 
     setStatus("Analyzing with VOSS AI...", "loading");
-    document.getElementById("analysis-output").style.display = "none";
+    document.getElementById("section-summary").style.display = "none";
+    document.getElementById("section-ledger").style.display = "none";
+    document.getElementById("section-actions").style.display = "none";
 
     try {
       const latestReport = reports[reports.length - 1];
@@ -527,23 +550,58 @@
       }
 
       const data = await response.json();
+      const summary = data.summary || {};
+      const taskLedger = data.taskLedger || [];
+      const actionPriority = data.actionPriority || [];
 
-      document.getElementById("out-hours").textContent = data.hoursSaved ?? "—";
-      document.getElementById("out-value").textContent = typeof data.economicValue === "number" ? "$" + data.economicValue.toLocaleString() : data.economicValue ?? "—";
-      document.getElementById("out-projected").textContent = data.projectedValue ?? "—";
-      document.getElementById("out-category").textContent = data.category ?? "—";
-      document.getElementById("out-ai").textContent = data.aiContribution ?? "—";
-      document.getElementById("out-human").textContent = data.humanContribution ?? "—";
+      // Section 1 - Summary
+      document.getElementById("out-hours").textContent = summary.hoursSaved ?? "—";
+      document.getElementById("out-cost").textContent = summary.costBasis ?? "—";
+      document.getElementById("out-value").textContent = typeof summary.economicValue === "number" ? "$" + summary.economicValue.toLocaleString() : summary.economicValue ?? "—";
+      document.getElementById("out-projected").textContent = summary.projectedValue ?? "—";
+      document.getElementById("out-category").textContent = summary.category ?? "—";
+      document.getElementById("out-ai").textContent = summary.aiContribution ?? "—";
+      document.getElementById("out-human").textContent = summary.humanContribution ?? "—";
       document.getElementById("out-source").textContent = `Source: ${latestReport.name} — ${latestReport.department}`;
+      document.getElementById("section-summary").style.display = "block";
 
-      const tasksEl = document.getElementById("out-tasks");
-      if (data.tasks && data.tasks.length > 0) {
-        tasksEl.innerHTML = data.tasks.map(t => `<span class="task-tag">${t}</span>`).join("");
-      } else {
-        tasksEl.innerHTML = '<span style="color:var(--muted);font-size:0.85rem;">No tasks identified</span>';
-      }
+      // Section 2 - Task Ledger
+      const ledgerBody = document.getElementById("out-ledger");
+      ledgerBody.innerHTML = "";
+      taskLedger.forEach((t, i) => {
+        ledgerBody.innerHTML += `
+          <tr>
+            <td class="ledger-rank">${i + 1}</td>
+            <td>${t.task}</td>
+            <td class="ledger-hours">${t.hoursSaved}h</td>
+            <td class="ledger-value">${t.projectedValue}</td>
+            <td><span class="confidence confidence-${t.confidence}">${t.confidence}</span></td>
+          </tr>`;
+      });
+      document.getElementById("section-ledger").style.display = "block";
 
-      document.getElementById("analysis-output").style.display = "block";
+      // Section 3 - Action Priority
+      const actionsEl = document.getElementById("out-actions");
+      actionsEl.innerHTML = "";
+      actionPriority.forEach((a, i) => {
+        const statusClass = a.status.replace(" ", "-");
+        actionsEl.innerHTML += `
+          <div class="action-item" id="action-${i}">
+            <div class="action-light light-${statusClass}" title="${a.status}"></div>
+            <div class="action-content">
+              <div class="action-text">${a.action}</div>
+              <div class="action-rationale">${a.rationale}</div>
+              <div class="status-toggle">
+                <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
+                <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡 In Progress</button>
+                <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴 Planned</button>
+              </div>
+            </div>
+            <div class="action-value">${a.projectedValue}</div>
+          </div>`;
+      });
+      document.getElementById("section-actions").style.display = "block";
+
       setStatus("Analysis complete — saved to database ✓", "success");
 
     } catch (err) {
@@ -552,12 +610,37 @@
     }
   }
 
+  function setActionStatus(index, newStatus) {
+    const statusClass = newStatus.replace(" ", "-");
+    const item = document.getElementById("action-" + index);
+    if (!item) return;
+
+    // Update light
+    const light = item.querySelector(".action-light");
+    light.className = "action-light light-" + statusClass;
+
+    // Update buttons
+    const buttons = item.querySelectorAll(".status-btn");
+    buttons.forEach(btn => {
+      btn.className = "status-btn";
+      if (
+        (newStatus === "Complete" && btn.textContent.includes("Complete")) ||
+        (newStatus === "In Progress" && btn.textContent.includes("In Progress")) ||
+        (newStatus === "Planned" && btn.textContent.includes("Planned"))
+      ) {
+        btn.className = "status-btn active-" + statusClass;
+      }
+    });
+  }
+
   function clearReports() {
     if (confirm("Clear all session data?")) {
       reports = [];
       localStorage.removeItem("vossReports");
       displayReports();
-      document.getElementById("analysis-output").style.display = "none";
+      document.getElementById("section-summary").style.display = "none";
+      document.getElementById("section-ledger").style.display = "none";
+      document.getElementById("section-actions").style.display = "none";
       setStatus("Session cleared", "");
     }
   }
