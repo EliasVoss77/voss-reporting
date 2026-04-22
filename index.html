@@ -240,11 +240,12 @@
   /* Section 3 - Action Priority */
   .action-table-header {
     display: grid;
-    grid-template-columns: 24px 1fr 90px 100px 80px;
+    grid-template-columns: 20px 1fr 80px 90px auto;
     gap: 12px;
     padding: 0 16px 10px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 10px;
+    align-items: center;
   }
 
   .action-col-label {
@@ -255,9 +256,9 @@
     text-transform: uppercase;
   }
 
-  @media (max-width: 600px) {
-    .action-table-header { grid-template-columns: 24px 1fr 70px 80px; }
-    .action-table-header .action-col-label:last-child { display: none; }
+  @media (max-width: 650px) {
+    .action-table-header { grid-template-columns: 20px 1fr 70px auto; }
+    .action-table-header .hide-mobile { display: none; }
   }
 
   .action-item {
@@ -270,20 +271,22 @@
   }
 
   .action-item:hover { border-color: var(--muted); }
-
   .action-item.status-Complete { border-left: 3px solid var(--accent); }
   .action-item.status-In-Progress { border-left: 3px solid var(--yellow); }
   .action-item.status-Planned { border-left: 3px solid var(--danger); }
 
+  /* Top row: light | text | hours | value | status buttons */
   .action-main {
     display: grid;
-    grid-template-columns: 24px 1fr 90px 100px 80px;
+    grid-template-columns: 20px 1fr 80px 90px auto;
     gap: 12px;
     align-items: start;
+    margin-bottom: 10px;
   }
 
-  @media (max-width: 600px) {
-    .action-main { grid-template-columns: 24px 1fr 70px 80px; }
+  @media (max-width: 650px) {
+    .action-main { grid-template-columns: 20px 1fr 70px auto; }
+    .action-main .hide-mobile { display: none; }
   }
 
   .action-light {
@@ -308,7 +311,7 @@
     color: var(--accent2);
     font-weight: 700;
     text-align: right;
-    padding-top: 2px;
+    padding-top: 3px;
   }
 
   .action-value {
@@ -317,25 +320,21 @@
     color: var(--accent);
     font-weight: 700;
     text-align: right;
-    padding-top: 2px;
+    padding-top: 3px;
   }
 
-  .action-controls {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
+  .status-toggle {
     display: flex;
+    gap: 5px;
+    flex-shrink: 0;
     align-items: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;
+    padding-top: 1px;
   }
-
-  .status-toggle { display: flex; gap: 6px; flex-shrink: 0; }
 
   .status-btn {
-    padding: 3px 10px;
+    padding: 3px 8px;
     border-radius: 2px;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-family: 'Share Tech Mono', monospace;
     cursor: pointer;
     border: 1px solid var(--border);
@@ -343,6 +342,7 @@
     color: var(--muted);
     transition: all 0.2s;
     letter-spacing: 0.05em;
+    white-space: nowrap;
   }
 
   .status-btn:hover { color: var(--text); border-color: var(--muted); }
@@ -350,25 +350,31 @@
   .status-btn.active-In-Progress { background: rgba(240,180,41,0.1); color: var(--yellow); border-color: var(--yellow); }
   .status-btn.active-Planned { background: rgba(255,77,109,0.1); color: var(--danger); border-color: var(--danger); }
 
+  /* Bottom row: notes spanning full width */
+  .action-notes-row {
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
   .notes-field {
-    flex: 1;
-    min-width: 200px;
-    padding: 6px 10px;
+    width: 100%;
+    padding: 8px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 3px;
     color: var(--text);
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     resize: none;
-    height: 32px;
+    height: 36px;
     overflow: hidden;
     transition: border-color 0.2s, height 0.2s;
     outline: none;
+    display: block;
   }
 
-  .notes-field::placeholder { color: var(--muted); font-size: 0.8rem; }
-  .notes-field:focus { border-color: var(--accent2); height: 64px; }
+  .notes-field::placeholder { color: var(--muted); font-size: 0.82rem; }
+  .notes-field:focus { border-color: var(--accent2); height: 72px; }
 
   .empty-state {
     text-align: center;
@@ -472,7 +478,7 @@
     <div class="action-table-header">
       <div class="action-col-label"></div>
       <div class="action-col-label">Task / Action</div>
-      <div class="action-col-label" style="text-align:right;">Hrs Saved</div>
+      <div class="action-col-label hide-mobile" style="text-align:right;">Hrs Saved</div>
       <div class="action-col-label" style="text-align:right;">Value</div>
       <div class="action-col-label" style="text-align:right;">Status</div>
     </div>
@@ -615,16 +621,15 @@
                 <div class="action-text">${a.action}</div>
                 <div class="action-rationale">${a.rationale}</div>
               </div>
-              <div class="action-hours">${a.hoursSaved}h</div>
+              <div class="action-hours hide-mobile">${a.hoursSaved}h</div>
               <div class="action-value">${a.projectedValue}</div>
-              <div></div>
-            </div>
-            <div class="action-controls">
               <div class="status-toggle">
-                <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
-                <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡 In Progress</button>
-                <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴 Planned</button>
+                <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢</button>
+                <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡</button>
+                <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴</button>
               </div>
+            </div>
+            <div class="action-notes-row">
               <textarea
                 class="notes-field"
                 id="action-note-${i}"
