@@ -279,6 +279,10 @@
     margin-bottom: 10px;
   }
 
+  .action-main-top {
+    display: contents;
+  }
+
   .action-light {
     width: 14px;
     height: 14px;
@@ -379,7 +383,47 @@
   .notes-field::placeholder { color: var(--muted); font-size: 0.82rem; }
   .notes-field:focus { border-color: var(--accent2); height: 72px; }
 
-  .empty-state {
+  @media (max-width: 600px) {
+    .action-table-header { display: none; }
+
+    .action-main {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .action-main-top {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .action-metrics-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      margin-left: 0;
+      text-align: left;
+      width: 100%;
+    }
+
+    .action-metrics-row {
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
+      width: 100%;
+    }
+
+    .action-hours { font-size: 1rem; }
+    .action-value { font-size: 1rem; }
+
+    .status-toggle {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+  }
     text-align: center;
     padding: 30px;
     color: var(--muted);
@@ -617,10 +661,12 @@
         actionsEl.innerHTML += `
           <div class="action-item status-${statusClass}" id="action-${i}">
             <div class="action-main">
-              <div class="action-light light-${statusClass}" id="light-${i}"></div>
-              <div>
-                <div class="action-text">${a.action}</div>
-                <div class="action-rationale">${a.rationale}</div>
+              <div class="action-main-top">
+                <div class="action-light light-${statusClass}" id="light-${i}"></div>
+                <div>
+                  <div class="action-text">${a.action}</div>
+                  <div class="action-rationale">${a.rationale}</div>
+                </div>
               </div>
               <div class="action-metrics-block">
                 <div class="action-metrics-row">
