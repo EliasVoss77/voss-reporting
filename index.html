@@ -240,8 +240,8 @@
   /* Section 3 - Action Priority */
   .action-table-header {
     display: grid;
-    grid-template-columns: 20px 1fr 160px;
-    gap: 12px;
+    grid-template-columns: 20px minmax(0, 1fr) 200px;
+    gap: 16px;
     padding: 0 16px 10px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 10px;
@@ -273,8 +273,8 @@
   /* Top row: light | task text | metrics+status block */
   .action-main {
     display: grid;
-    grid-template-columns: 20px 1fr 160px;
-    gap: 12px;
+    grid-template-columns: 20px minmax(0, 1fr) 200px;
+    gap: 16px;
     align-items: start;
     margin-bottom: 10px;
   }
@@ -292,8 +292,8 @@
   .light-In-Progress { background: var(--yellow); color: var(--yellow); }
   .light-Planned { background: var(--danger); color: var(--danger); }
 
-  .action-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
-  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+  .action-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; overflow-wrap: break-word; word-break: break-word; }
+  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.4; overflow-wrap: break-word; word-break: break-word; }
 
   /* Right block: hours + value on top, status buttons below */
   .action-metrics-block {
