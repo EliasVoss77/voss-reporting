@@ -240,7 +240,7 @@
   /* Section 3 - Action Priority */
   .action-table-header {
     display: grid;
-    grid-template-columns: 20px 1fr 80px 90px auto;
+    grid-template-columns: 20px 1fr 160px;
     gap: 12px;
     padding: 0 16px 10px;
     border-bottom: 1px solid var(--border);
@@ -254,11 +254,6 @@
     letter-spacing: 0.15em;
     color: var(--muted);
     text-transform: uppercase;
-  }
-
-  @media (max-width: 650px) {
-    .action-table-header { grid-template-columns: 20px 1fr 70px auto; }
-    .action-table-header .hide-mobile { display: none; }
   }
 
   .action-item {
@@ -275,27 +270,22 @@
   .action-item.status-In-Progress { border-left: 3px solid var(--yellow); }
   .action-item.status-Planned { border-left: 3px solid var(--danger); }
 
-  /* Top row: light | text | hours | value | status buttons */
+  /* Top row: light | task text | metrics+status block */
   .action-main {
     display: grid;
-    grid-template-columns: 20px 1fr 80px 90px auto;
+    grid-template-columns: 20px 1fr 160px;
     gap: 12px;
     align-items: start;
     margin-bottom: 10px;
-  }
-
-  @media (max-width: 650px) {
-    .action-main { grid-template-columns: 20px 1fr 70px auto; }
-    .action-main .hide-mobile { display: none; }
   }
 
   .action-light {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    margin-top: 4px;
+    margin-top: 5px;
     flex-shrink: 0;
-    box-shadow: 0 0 8px currentColor;
+    box-shadow: 0 0 10px currentColor;
   }
 
   .light-Complete { background: var(--accent); color: var(--accent); }
@@ -303,32 +293,43 @@
   .light-Planned { background: var(--danger); color: var(--danger); }
 
   .action-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
-  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+  /* Right block: hours + value on top, status buttons below */
+  .action-metrics-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .action-metrics-row {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+  }
 
   .action-hours {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: var(--accent2);
     font-weight: 700;
     text-align: right;
-    padding-top: 3px;
   }
 
   .action-value {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: var(--accent);
     font-weight: 700;
     text-align: right;
-    padding-top: 3px;
   }
 
   .status-toggle {
     display: flex;
     gap: 5px;
     flex-shrink: 0;
-    align-items: flex-start;
-    padding-top: 1px;
+    justify-content: flex-end;
   }
 
   .status-btn {
@@ -478,9 +479,7 @@
     <div class="action-table-header">
       <div class="action-col-label"></div>
       <div class="action-col-label">Task / Action</div>
-      <div class="action-col-label hide-mobile" style="text-align:right;">Hrs Saved</div>
-      <div class="action-col-label" style="text-align:right;">Value</div>
-      <div class="action-col-label" style="text-align:right;">Status</div>
+      <div class="action-col-label" style="text-align:right;">Hrs Saved / Projected Value</div>
     </div>
     <div id="out-actions"></div>
   </div>
@@ -621,12 +620,16 @@
                 <div class="action-text">${a.action}</div>
                 <div class="action-rationale">${a.rationale}</div>
               </div>
-              <div class="action-hours hide-mobile">${a.hoursSaved}h</div>
-              <div class="action-value">${a.projectedValue}</div>
-              <div class="status-toggle">
-                <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢</button>
-                <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡</button>
-                <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴</button>
+              <div class="action-metrics-block">
+                <div class="action-metrics-row">
+                  <div class="action-hours">${a.hoursSaved}h saved</div>
+                  <div class="action-value">${a.projectedValue}</div>
+                </div>
+                <div class="status-toggle">
+                  <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
+                  <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡 In Progress</button>
+                  <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴 Planned</button>
+                </div>
               </div>
             </div>
             <div class="action-notes-row">
