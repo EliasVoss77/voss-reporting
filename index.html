@@ -1,146 +1,816 @@
-export default {
-  async fetch(request, env) {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOSS Reporting</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090c10;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: #21262d;
+    --accent: #00ff88;
+    --accent2: #00c8ff;
+    --danger: #ff4d6d;
+    --yellow: #f0b429;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --glow: 0 0 20px rgba(0,255,136,0.15);
+  }
 
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, x-api-key"
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .logo-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .logo-bar { height: 2px; width: 60px; background: linear-gradient(90deg, transparent, var(--accent)); }
+  .logo-bar.right { background: linear-gradient(90deg, var(--accent), transparent); }
+
+  h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,255,136,0.4);
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0.6;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--muted); font-size: 0.9rem; }
+  input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,255,136,0.08); }
+  textarea { resize: vertical; min-height: 120px; margin-bottom: 12px; }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary { background: var(--accent); color: #000; width: 100%; font-weight: 700; }
+  .btn-primary:hover { background: #00e07a; box-shadow: var(--glow); transform: translateY(-1px); }
+
+  .btn-row { display: flex; gap: 10px; margin-bottom: 24px; }
+
+  .btn-secondary { flex: 1; background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
+  .btn-secondary:hover { background: rgba(0,200,255,0.08); }
+
+  .btn-ghost { flex: 1; background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
+
+  #status-bar {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+
+  #status-bar.success { border-color: var(--accent); color: var(--accent); }
+  #status-bar.error { border-color: var(--danger); color: var(--danger); }
+  #status-bar.loading { border-color: var(--accent2); color: var(--accent2); }
+
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .loading .status-dot { animation: pulse 1s infinite; }
+
+  .report-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 3px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .report-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .report-name { font-weight: 700; font-size: 1rem; }
+  .report-dept { font-size: 0.75rem; color: var(--accent2); font-family: 'Share Tech Mono', monospace; }
+  .report-preview { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* Section 1 - Summary */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 16px; text-align: center; }
+  .stat-label { font-size: 0.62rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; font-family: 'Share Tech Mono', monospace; margin-bottom: 8px; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat-value.blue { color: var(--accent2); }
+
+  .contrib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .contrib-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 14px; text-align: center; }
+
+  .analysis-source {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+
+  /* Section 2 - Chat Recap */
+  .chat-recap {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Section 3 - Action Priority */
+  .action-table-header {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 20px;
+    padding: 0 16px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .action-col-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .action-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .action-item:hover { border-color: var(--muted); }
+  .action-item.status-Complete { border-left: 3px solid var(--accent); }
+  .action-item.status-In-Progress { border-left: 3px solid var(--yellow); }
+  .action-item.status-Planned { border-left: 3px solid var(--danger); }
+
+  /* Top row: light | task text | metrics+status block */
+  .action-main {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .action-main-top {
+    display: contents;
+  }
+
+  .action-light {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  .light-Complete { background: var(--accent); color: var(--accent); }
+  .light-In-Progress { background: var(--yellow); color: var(--yellow); }
+  .light-Planned { background: var(--danger); color: var(--danger); }
+
+  .action-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; overflow-wrap: break-word; word-break: break-word; }
+  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.4; overflow-wrap: break-word; word-break: break-word; }
+
+  /* Right block: hours + value on top, status buttons below */
+  .action-metrics-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .action-metrics-row {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+  }
+
+  .action-hours {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--accent2);
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .action-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .status-toggle {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+    justify-content: flex-end;
+  }
+
+  .status-btn {
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-size: 0.62rem;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .status-btn:hover { color: var(--text); border-color: var(--muted); }
+  .status-btn.active-Complete { background: rgba(0,255,136,0.1); color: var(--accent); border-color: var(--accent); }
+  .status-btn.active-In-Progress { background: rgba(240,180,41,0.1); color: var(--yellow); border-color: var(--yellow); }
+  .status-btn.active-Planned { background: rgba(255,77,109,0.1); color: var(--danger); border-color: var(--danger); }
+
+  /* Bottom row: notes spanning full width */
+  .action-notes-row {
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .notes-field {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    resize: none;
+    height: 36px;
+    overflow: hidden;
+    transition: border-color 0.2s, height 0.2s;
+    outline: none;
+    display: block;
+  }
+
+  .notes-field::placeholder { color: var(--muted); font-size: 0.82rem; }
+  .notes-field:focus { border-color: var(--accent2); height: 72px; }
+
+  @media (max-width: 600px) {
+    .action-table-header { display: none; }
+
+    .action-main {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .action-main-top {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .action-metrics-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      margin-left: 0;
+      text-align: left;
+      width: 100%;
+    }
+
+    .action-metrics-row {
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
+      width: 100%;
+    }
+
+    .action-hours { font-size: 1rem; }
+    .action-value { font-size: 1rem; }
+
+    .status-toggle {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+  }
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+
+  @media print {
+    body { background: white !important; color: black !important; }
+    body::before { display: none; }
+    .btn-row, #status-bar, #export-row, form, .card:first-of-type { display: none !important; }
+    #reports { display: none !important; }
+    .card { border: 1px solid #ccc !important; background: white !important; break-inside: avoid; }
+    .stat-box, .contrib-box { border: 1px solid #ccc !important; background: #f9f9f9 !important; }
+    .action-item { border: 1px solid #ccc !important; background: #f9f9f9 !important; break-inside: avoid; }
+    h1, .card-title { color: #000 !important; text-shadow: none !important; }
+    .stat-value, .stat-label, .action-text { color: #000 !important; }
+    .stat-value.blue, .action-rationale, .action-hours, .action-value { color: #333 !important; }
+    .notes-field { border: 1px solid #ccc !important; color: #333 !important; background: white !important; }
+    footer { color: #999 !important; }
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo-line">
+      <div class="logo-bar"></div>
+      <h1>VOSS</h1>
+      <div class="logo-bar right"></div>
+    </div>
+    <p class="subtitle">Virtual Operating System Synopsis Reporting</p>
+  </header>
+
+  <!-- Submit Report -->
+  <div class="card">
+    <div class="card-title">Submit Report</div>
+    <form id="reportForm">
+      <div class="form-row">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="department" placeholder="Department — Position">
+      </div>
+      <textarea id="issue" placeholder="Paste chat transcript here..." required></textarea>
+      <button type="submit" class="btn btn-primary">Submit Report</button>
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="generateAiReport()">⚡ VOSS Value Report</button>
+    <button class="btn btn-ghost" onclick="clearReports()">✕ Clear Session</button>
+  </div>
+
+  <!-- Status -->
+  <div id="status-bar">
+    <div class="status-dot"></div>
+    <span id="status-text">System ready — submit a report to begin</span>
+  </div>
+
+  <!-- Section 1: Time & Value Summary -->
+  <div id="section-summary" class="card" style="display:none;">
+    <div class="card-title">Section 1 — Time & Value Summary</div>
+    <div class="summary-grid">
+      <div class="stat-box">
+        <div class="stat-label">Hours Saved</div>
+        <div class="stat-value" id="out-hours">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Cost Basis</div>
+        <div class="stat-value blue" id="out-cost">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Projected Value</div>
+        <div class="stat-value" id="out-projected">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Category</div>
+        <div class="stat-value blue" style="font-size:0.95rem;" id="out-category">—</div>
+      </div>
+    </div>
+    <div class="contrib-row">
+      <div class="contrib-box">
+        <div class="stat-label">AI Contribution</div>
+        <div class="stat-value" id="out-ai">—</div>
+      </div>
+      <div class="contrib-box">
+        <div class="stat-label">Human Contribution</div>
+        <div class="stat-value blue" id="out-human">—</div>
+      </div>
+    </div>
+    <div class="analysis-source" id="out-source"></div>
+  </div>
+
+  <!-- Section 2: Chat Recap -->
+  <div id="section-recap" class="card" style="display:none;">
+    <div class="card-title">Section 2 — Chat Summary</div>
+    <p class="chat-recap" id="out-recap"></p>
+  </div>
+
+  <!-- Section 3: Action Priority List -->
+  <div id="section-actions" class="card" style="display:none;">
+    <div class="card-title">Section 3 — Action Priority List</div>
+    <div class="action-table-header">
+      <div class="action-col-label"></div>
+      <div class="action-col-label">Task / Action</div>
+      <div class="action-col-label" style="text-align:right;">Hrs Saved / Projected Value</div>
+    </div>
+    <div id="out-actions"></div>
+  </div>
+
+  <!-- Export & Share -->
+  <div id="export-row" class="btn-row" style="display:none;">
+    <button class="btn btn-secondary" onclick="exportPDF()">📄 Export PDF</button>
+    <button class="btn btn-secondary" onclick="shareReport()">📧 Share via Email</button>
+  </div>
+
+  <!-- Submitted Reports -->
+  <div class="card">
+    <div class="card-title">Submitted Reports</div>
+    <div id="reports"><div class="empty-state">[ NO REPORTS THIS SESSION ]</div></div>
+  </div>
+
+</div>
+
+<footer style="text-align:center;padding:20px 20px 40px;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#3d4550;letter-spacing:0.05em;line-height:1.6;">
+  VOSS reports are generated by AI and may contain inaccuracies.<br>Please review all outputs before making business decisions.
+</footer>
+
+<script>
+  const WORKER_URL = "https://voss-reporting.eliasvoss77.workers.dev";
+  const API_KEY = "voss-dk7x-2f9m-q372";
+
+  let reports = [];
+  let actionNotes = {};
+
+  window.onload = function() {
+    const saved = localStorage.getItem("vossReports");
+    if (saved) {
+      reports = JSON.parse(saved);
+      displayReports();
+    }
+    const savedNotes = localStorage.getItem("vossActionNotes");
+    if (savedNotes) actionNotes = JSON.parse(savedNotes);
+  };
+
+  function setStatus(msg, type = "") {
+    const bar = document.getElementById("status-bar");
+    bar.className = type;
+    document.getElementById("status-text").textContent = msg;
+  }
+
+  document.getElementById("reportForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const report = {
+      name: document.getElementById("name").value,
+      department: document.getElementById("department").value,
+      text: document.getElementById("issue").value
     };
+    reports.push(report);
+    localStorage.setItem("vossReports", JSON.stringify(reports));
+    displayReports();
+    document.getElementById("reportForm").reset();
+    setStatus(`Report from ${report.name} submitted successfully`, "success");
+  });
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+  function displayReports() {
+    const container = document.getElementById("reports");
+    if (reports.length === 0) {
+      container.innerHTML = '<div class="empty-state">[ NO REPORTS THIS SESSION ]</div>';
+      return;
+    }
+    container.innerHTML = "";
+    reports.forEach(r => {
+      container.innerHTML += `
+        <div class="report-item">
+          <div class="report-meta">
+            <span class="report-name">${r.name}</span>
+            <span class="report-dept">${r.department}</span>
+          </div>
+          <div class="report-preview">${r.text.substring(0, 120)}...</div>
+        </div>`;
+    });
+  }
+
+  async function generateAiReport() {
+    if (reports.length === 0) {
+      setStatus("No reports to analyze — submit a report first", "error");
+      return;
     }
 
-    if (request.method !== "POST") {
-      return new Response("Method not allowed", { status: 405, headers: corsHeaders });
-    }
-
-    const apiKey = request.headers.get("x-api-key");
-    if (apiKey !== "voss-dk7x-2f9m-q372") {
-      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-    }
+    setStatus("Analyzing with VOSS AI...", "loading");
+    document.getElementById("section-summary").style.display = "none";
+    document.getElementById("section-recap").style.display = "none";
+    document.getElementById("section-actions").style.display = "none";
 
     try {
-      const body = await request.json();
-      const chatText = body.chat || "";
-      const name = body.name || "Unknown";
-      const department = body.department || "Unknown";
+      const latestReport = reports[reports.length - 1];
 
-      if (chatText.trim().length === 0) {
-        return new Response("No chat text provided", { status: 400, headers: corsHeaders });
-      }
-
-      const prompt = `
-You are an AI productivity analyst for VOSS Reporting. Analyze the conversation below and extract structured data.
-
-Return ONLY a valid JSON object with NO markdown formatting, NO backticks, NO extra text outside the JSON.
-
-Required JSON Structure:
-{
-  "summary": {
-    "hoursSaved": 0,
-    "costBasis": "$0",
-    "projectedValue": "$0",
-    "aiContribution": "XX%",
-    "humanContribution": "XX%",
-    "category": "Category Name"
-  },
-  "chatRecap": "A 3-5 sentence paragraph summarizing the key concepts, topics, and outcomes discussed in this conversation at a high level. Written in plain business language, no bullet points.",
-  "actionItems": [
-    {
-      "action": "Specific task or action description",
-      "hoursSaved": 0,
-      "projectedValue": "$0",
-      "status": "Complete",
-      "rationale": "Brief reason for priority or status",
-      "notes": ""
-    }
-  ]
-}
-
-PROJECTED VALUE CALCULATION RULES — follow these exactly for consistency:
-- Projected value = total value if ALL action items were completed successfully
-- Use a standard rate of $125/hour as the baseline for knowledge work unless context clearly indicates otherwise
-- hoursSaved × $125 = cost basis
-- projectedValue = cost basis × a multiplier based on business impact:
-  - Low impact (internal process, minor efficiency): multiplier 2-3x
-  - Medium impact (customer facing, revenue adjacent): multiplier 5-8x
-  - High impact (direct revenue, product launch, major efficiency): multiplier 8-15x
-- Round all dollar values to the nearest $50 for consistency
-- If the same conversation is analyzed twice, the projected value should be within 10% each time
-- actionItems projectedValue should sum to approximately the summary projectedValue
-
-ADDITIONAL RULES:
-- taskLedger: rank all items by projected value highest first
-- status must be exactly "Complete", "In Progress", or "Planned"
-- notes should always be empty string ""
-- Include 5-10 total action items
-- hoursSaved should be a number, not a string
-- All dollar values should be strings like "$1,250" or "$45,000"
-
-Conversation:
-${chatText}
-`;
-
-      const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch(WORKER_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": env.ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
+          "x-api-key": API_KEY
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 2048,
-          messages: [{ role: "user", content: prompt }]
+          chat: latestReport.text,
+          name: latestReport.name,
+          department: latestReport.department
         })
       });
 
-      const aiData = await anthropicResponse.json();
-
-      if (!anthropicResponse.ok || !aiData.content) {
-        return new Response(JSON.stringify(aiData), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error("Worker " + response.status + ": " + errText.substring(0, 200));
       }
 
-      let content = aiData.content[0].text;
-      content = content.replace(/```json\s*|\s*```/g, "").trim();
+      const data = await response.json();
+      const summary = data.summary || {};
+      const chatRecap = data.chatRecap || "";
+      const actionItems = data.actionItems || [];
 
-      let parsedJson;
-      try {
-        parsedJson = JSON.parse(content);
-      } catch (e) {
-        return new Response("AI failed to return valid JSON: " + content, { status: 500, headers: corsHeaders });
-      }
+      // Section 1 - Summary
+      document.getElementById("out-hours").textContent = summary.hoursSaved ?? "—";
+      document.getElementById("out-cost").textContent = summary.costBasis ?? "—";
+      document.getElementById("out-projected").textContent = summary.projectedValue ?? "—";
+      document.getElementById("out-category").textContent = summary.category ?? "—";
+      document.getElementById("out-ai").textContent = summary.aiContribution ?? "—";
+      document.getElementById("out-human").textContent = summary.humanContribution ?? "—";
+      document.getElementById("out-source").textContent = `Source: ${latestReport.name} — ${latestReport.department}`;
+      document.getElementById("section-summary").style.display = "block";
 
-      // Save to D1 database
-      const summary = parsedJson.summary || {};
-      const actionItems = parsedJson.actionItems || [];
+      // Section 2 - Chat Recap
+      document.getElementById("out-recap").textContent = chatRecap;
+      document.getElementById("section-recap").style.display = "block";
 
-      await env.DB.prepare(`
-        INSERT INTO reports (name, department, chat_text, tasks, hours_saved, economic_value, projected_value, ai_contribution, human_contribution, category)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        name,
-        department,
-        chatText,
-        JSON.stringify(actionItems.map(t => t.action)),
-        summary.hoursSaved || 0,
-        0,
-        summary.projectedValue || "$0",
-        summary.aiContribution || "0%",
-        summary.humanContribution || "0%",
-        summary.category || "Uncategorized"
-      ).run();
+      // Section 3 - Action Priority
+      const actionsEl = document.getElementById("out-actions");
+      actionsEl.innerHTML = "";
 
-      return new Response(JSON.stringify(parsedJson), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      actionItems.forEach((a, i) => {
+        const statusClass = a.status.replace(" ", "-");
+        const savedNote = actionNotes[`action-note-${i}`] || "";
+
+        actionsEl.innerHTML += `
+          <div class="action-item status-${statusClass}" id="action-${i}">
+            <div class="action-main">
+              <div class="action-main-top">
+                <div class="action-light light-${statusClass}" id="light-${i}"></div>
+                <div>
+                  <div class="action-text">${a.action}</div>
+                  <div class="action-rationale">${a.rationale}</div>
+                </div>
+              </div>
+              <div class="action-metrics-block">
+                <div class="action-metrics-row">
+                  <div class="action-hours">${a.hoursSaved}h saved</div>
+                  <div class="action-value">${a.projectedValue}</div>
+                </div>
+                <div class="status-toggle">
+                  <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
+                  <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡 In Progress</button>
+                  <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴 Planned</button>
+                </div>
+              </div>
+            </div>
+            <div class="action-notes-row">
+              <textarea
+                class="notes-field"
+                id="action-note-${i}"
+                placeholder="Add notes..."
+                onchange="saveNote(${i})"
+                onkeyup="saveNote(${i})"
+              >${savedNote}</textarea>
+            </div>
+          </div>`;
       });
 
+      document.getElementById("section-actions").style.display = "block";
+      document.getElementById("export-row").style.display = "flex";
+      setStatus("Analysis complete — saved to database ✓", "success");
+
     } catch (err) {
-      return new Response(`Server Error: ${err.message}`, { status: 500, headers: corsHeaders });
+      console.error(err);
+      setStatus("Error: " + err.message, "error");
     }
   }
-};
+
+  function setActionStatus(index, newStatus) {
+    const statusClass = newStatus.replace(" ", "-");
+    const item = document.getElementById("action-" + index);
+    if (!item) return;
+
+    item.className = "action-item status-" + statusClass;
+
+    const light = document.getElementById("light-" + index);
+    light.className = "action-light light-" + statusClass;
+
+    const buttons = item.querySelectorAll(".status-btn");
+    buttons.forEach(btn => {
+      btn.className = "status-btn";
+      if (
+        (newStatus === "Complete" && btn.textContent.includes("Complete")) ||
+        (newStatus === "In Progress" && btn.textContent.includes("In Progress")) ||
+        (newStatus === "Planned" && btn.textContent.includes("Planned"))
+      ) {
+        btn.className = "status-btn active-" + statusClass;
+      }
+    });
+  }
+
+  function saveNote(index) {
+    const noteEl = document.getElementById("action-note-" + index);
+    if (noteEl) {
+      actionNotes["action-note-" + index] = noteEl.value;
+      localStorage.setItem("vossActionNotes", JSON.stringify(actionNotes));
+    }
+  }
+
+  function exportPDF() {
+    // Hide buttons temporarily for clean print
+    document.getElementById("export-row").style.display = "none";
+    document.querySelectorAll(".btn-row").forEach(el => el.style.display = "none");
+    document.getElementById("status-bar").style.display = "none";
+    document.querySelector(".card").style.display = "none"; // hide submit form
+    document.getElementById("reports").closest(".card").style.display = "none"; // hide submitted reports
+
+    window.print();
+
+    // Restore after print dialog
+    setTimeout(() => {
+      document.getElementById("export-row").style.display = "flex";
+      document.querySelectorAll(".btn-row").forEach(el => el.style.display = "flex");
+      document.getElementById("status-bar").style.display = "flex";
+      document.querySelector(".card").style.display = "block";
+      document.getElementById("reports").closest(".card").style.display = "block";
+    }, 1000);
+  }
+
+  function shareReport() {
+    const name = document.getElementById("out-source").textContent || "VOSS Report";
+    const hours = document.getElementById("out-hours").textContent;
+    const projected = document.getElementById("out-projected").textContent;
+    const category = document.getElementById("out-category").textContent;
+    const recap = document.getElementById("out-recap").textContent;
+
+    const actions = [];
+    document.querySelectorAll(".action-text").forEach(el => actions.push("• " + el.textContent));
+
+    const subject = encodeURIComponent("VOSS Report — " + category);
+    const body = encodeURIComponent(
+      "VOSS VALUE REPORT\n" +
+      "═══════════════════════════\n\n" +
+      name + "\n\n" +
+      "SUMMARY\n" +
+      "Hours Saved: " + hours + "\n" +
+      "Projected Value: " + projected + "\n" +
+      "Category: " + category + "\n\n" +
+      "CHAT SUMMARY\n" +
+      recap + "\n\n" +
+      "ACTION PRIORITY LIST\n" +
+      actions.join("\n") + "\n\n" +
+      "─────────────────────────\n" +
+      "Generated by VOSS Reporting — app.vossintel.com"
+    );
+
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }
+
+  function clearReports() {
+    if (confirm("Clear all session data?")) {
+      reports = [];
+      actionNotes = {};
+      localStorage.removeItem("vossReports");
+      localStorage.removeItem("vossActionNotes");
+      displayReports();
+      document.getElementById("section-summary").style.display = "none";
+      document.getElementById("section-recap").style.display = "none";
+      document.getElementById("section-actions").style.display = "none";
+      document.getElementById("export-row").style.display = "none";
+      setStatus("Session cleared", "");
+    }
+  }
+</script>
+</body>
+</html>
