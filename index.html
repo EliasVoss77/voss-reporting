@@ -1161,8 +1161,7 @@
 
           <div class="calc-field" style="margin-bottom:16px;">
             <label>Industry Multiplier — <span id="mult-label">General (1.0x)</span></label>
-            <input type="range" id="calc-multiplier" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateMultiplierLabel(); recalculate()">
-            <div class="calc-range-row">
+            <input type="range" id="calc-multiplier" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateMultiplierLabel(); recalculate()">            <div class="calc-range-row">
               <span>0.5x Low</span>
               <span>1.0x General</span>
               <span>2.0x High</span>
@@ -1263,6 +1262,7 @@
   // ─── VALUE CALCULATOR ───
   let calcRate = 65;
   let calcAiPct = 1.0;
+  let rawActionItems = [];
 
   function setRole(btn, rate) {
     document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
@@ -1275,13 +1275,18 @@
   function updateMultiplierLabel() {
     const val = parseFloat(document.getElementById('calc-multiplier').value);
     let label = 'General (1.0x)';
-    if (val <= 0.6) label = 'Non-Profit / Low Margin ('+val+'x)';
-    else if (val <= 0.8) label = 'Retail / Service ('+val+'x)';
-    else if (val <= 1.0) label = 'General / Mixed ('+val+'x)';
-    else if (val <= 1.2) label = 'Tech / SaaS ('+val+'x)';
-    else if (val <= 1.5) label = 'Finance / Consulting ('+val+'x)';
-    else label = 'High Value / Enterprise ('+val+'x)';
+    if (val <= 0.6) label = 'Non-Profit / Low Margin (' + val + 'x)';
+    else if (val <= 0.8) label = 'Retail / Service (' + val + 'x)';
+    else if (val <= 1.0) label = 'General / Mixed (' + val + 'x)';
+    else if (val <= 1.2) label = 'Tech / SaaS (' + val + 'x)';
+    else if (val <= 1.5) label = 'Finance / Consulting (' + val + 'x)';
+    else label = 'High Value / Enterprise (' + val + 'x)';
     document.getElementById('mult-label').textContent = label;
+  }
+
+  function parseDollar(str) {
+    if (typeof str === 'number') return str;
+    return parseFloat(String(str).replace(/[$,]/g, '')) || 0;
   }
 
   function recalculate() {
@@ -1289,17 +1294,34 @@
     const hours = parseFloat(document.getElementById('calc-hours').value) || 0;
     const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
 
-    const projected = hours * rate * calcAiPct * multiplier;
-    const rounded = Math.round(projected / 50) * 50;
-
-    document.getElementById('calc-output').textContent = '$' + rounded.toLocaleString();
-    document.getElementById('calc-formula-display').textContent =
-      `$${rate}/hr × ${hours}h × ${Math.round(calcAiPct * 100)}% AI × ${multiplier}x`;
-
-    // Update the main projected value display
-    if (rounded > 0) {
-      document.getElementById('out-projected').textContent = '$' + rounded.toLocaleString();
+    // Projected Value = sum of all action items × multiplier
+    let projectedTotal = 0;
+    if (rawActionItems.length > 0) {
+      rawActionItems.forEach(a => {
+        projectedTotal += parseDollar(a.projectedValue) * multiplier;
+      });
+    } else {
+      projectedTotal = hours * rate * calcAiPct * multiplier;
     }
+    projectedTotal = Math.round(projectedTotal / 50) * 50;
+
+    document.getElementById('calc-output').textContent = '$' + projectedTotal.toLocaleString();
+    document.getElementById('calc-formula-display').textContent =
+      `Sum of tasks × ${multiplier}x | $${rate}/hr × ${Math.round(calcAiPct * 100)}% AI`;
+
+    // Update Section 1 projected value
+    document.getElementById('out-projected').textContent = '$' + projectedTotal.toLocaleString();
+  }
+
+  function applyMultiplierToSection3() {
+    // Called on slider release — updates each task value in Section 3
+    if (rawActionItems.length === 0) return;
+    const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
+    rawActionItems.forEach((a, i) => {
+      const adjusted = Math.round((parseDollar(a.projectedValue) * multiplier) / 50) * 50;
+      const valEl = document.getElementById('action-value-' + i);
+      if (valEl) valEl.textContent = '$' + adjusted.toLocaleString();
+    });
   }
 
   function showFormulaModal() {
@@ -1310,9 +1332,19 @@
     document.getElementById('formula-modal').classList.remove('open');
   }
 
-  // Close modal on overlay click
-  document.getElementById('formula-modal')?.addEventListener('click', function(e) {
-    if (e.target === this) closeFormulaModal();
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('formula-modal');
+    if (modal) modal.addEventListener('click', function(e) {
+      if (e.target === this) closeFormulaModal();
+    });
+    // Apply multiplier to Section 3 on slider release
+    const slider = document.getElementById('calc-multiplier');
+    if (slider) {
+      slider.addEventListener('change', () => {
+        applyMultiplierToSection3();
+        recalculate();
+      });
+    }
   });
 
 
@@ -1571,6 +1603,7 @@
       document.getElementById('section-recap').style.display = 'block';
 
       // Section 3
+      rawActionItems = actionItems; // store for calculator
       const actionsEl = document.getElementById('out-actions');
       actionsEl.innerHTML = '';
       actionItems.forEach((a, i) => {
@@ -1620,7 +1653,7 @@
           <div class="action-metrics-block">
             <div class="action-metrics-row">
               <div class="action-hours">${a.hoursSaved}h saved</div>
-              <div class="action-value">${a.projectedValue}</div>
+              <div class="action-value" id="action-value-${i}">${a.projectedValue}</div>
             </div>
             <div class="status-toggle">
               <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
@@ -1664,6 +1697,7 @@
       sessionReports = [];
       actionNotes = {};
       currentReportData = null;
+      rawActionItems = [];
       displaySessionReports();
       document.getElementById('section-summary').style.display = 'none';
       document.getElementById('section-calculator').style.display = 'none';
