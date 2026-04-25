@@ -724,7 +724,62 @@
   .report-dept { font-size: 0.75rem; color: var(--accent2); font-family: 'Share Tech Mono', monospace; }
   .report-preview { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
 
-  .empty-state { text-align: center; padding: 30px; color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 0.1em; }
+  /* Per-task overrides */
+  .task-overrides {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0 8px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .task-override-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .task-override-field label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .task-select {
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .task-select:focus { border-color: var(--accent2); }
+
+  .task-number {
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .task-number:focus { border-color: var(--accent2); }
 
   /* ─── VALUE CALCULATOR ─── */
 
@@ -1138,30 +1193,29 @@
         <div id="section-calculator" class="card" style="display:none;">
           <div class="card-title">Section 1B — Value Calculator <span class="info-icon" onclick="showFormulaModal()">i</span></div>
 
-          <div class="calc-section-label">// Select Your Role</div>
+          <div class="calc-section-label">// Default Role (applies to all tasks)</div>
           <div class="role-toggles">
-            <button class="role-btn active" onclick="setRole(this, 65)">Individual</button>
-            <button class="role-btn" onclick="setRole(this, 95)">Manager</button>
-            <button class="role-btn" onclick="setRole(this, 150)">Executive</button>
-            <button class="role-btn" onclick="setRole(this, 85)">Policy / Gov</button>
-            <button class="role-btn" onclick="setRole(this, 125)">Tech / Dev</button>
-            <button class="role-btn" onclick="setRole(this, 110)">Finance</button>
+            <button class="role-btn" onclick="setRole(this, 35)">Junior ($35/hr)</button>
+            <button class="role-btn active" onclick="setRole(this, 65)">Mid ($65/hr)</button>
+            <button class="role-btn" onclick="setRole(this, 95)">Senior ($95/hr)</button>
+            <button class="role-btn" onclick="setRole(this, 150)">Executive ($150/hr)</button>
           </div>
 
           <div class="calc-row">
             <div class="calc-field">
-              <label>Hourly Rate ($)</label>
+              <label>Default Hourly Rate ($)</label>
               <input type="number" id="calc-rate" value="65" min="15" max="500" oninput="recalculate()">
             </div>
             <div class="calc-field">
-              <label>Hours Saved</label>
-              <input type="number" id="calc-hours" value="0" min="0" max="1000" oninput="recalculate()">
+              <label>Default Headcount</label>
+              <input type="number" id="calc-headcount" value="1" min="1" max="50" oninput="recalculate()">
             </div>
           </div>
 
           <div class="calc-field" style="margin-bottom:16px;">
             <label>Industry Multiplier — <span id="mult-label">General (1.0x)</span></label>
-            <input type="range" id="calc-multiplier" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateMultiplierLabel(); recalculate()">            <div class="calc-range-row">
+            <input type="range" id="calc-multiplier" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateMultiplierLabel(); recalculate()">
+            <div class="calc-range-row">
               <span>0.5x Low</span>
               <span>1.0x General</span>
               <span>2.0x High</span>
@@ -1174,7 +1228,7 @@
               <div class="calc-result-value" id="calc-output">$0</div>
             </div>
             <div class="calc-formula" id="calc-formula-display">
-              $65/hr × 0h × 100% AI × 1.0x
+              Σ tasks × role rate × headcount × multiplier
             </div>
           </div>
 
@@ -1189,17 +1243,19 @@
           <div class="modal">
             <div class="modal-title">// How We Calculate</div>
             <div class="modal-body">
-              <p>VOSS projects value based on a transparent formula you can adjust:</p>
+              <p>VOSS projects value based on a transparent, adjustable formula:</p>
               <div class="modal-formula">
                 Projected Value =<br>
-                &nbsp;&nbsp;(Hours Saved × Hourly Rate)<br>
-                &nbsp;&nbsp;× AI Contribution %<br>
-                &nbsp;&nbsp;× Industry Multiplier
+                &nbsp;&nbsp;Σ (Hours to Complete × Role Rate × Headcount)<br>
+                &nbsp;&nbsp;× Industry Multiplier<br><br>
+                Chat Value =<br>
+                &nbsp;&nbsp;Hours Saved × $65/hr × AI Contribution %
               </div>
-              <p><strong>Hours Saved</strong> — estimated by AI based on tasks identified in the chat transcript.</p>
-              <p style="margin-top:8px;"><strong>Hourly Rate</strong> — preset by role, fully adjustable. Defaults use US national averages.</p>
-              <p style="margin-top:8px;"><strong>AI Contribution %</strong> — the percentage of work attributed to AI vs human, extracted from your session.</p>
-              <p style="margin-top:8px;"><strong>Industry Multiplier</strong> — adjusts value based on the economic impact of your industry. Low-margin industries default lower; high-value industries scale up.</p>
+              <p><strong>Hours to Complete</strong> — realistic estimate of human hours needed to finish each task.</p>
+              <p style="margin-top:8px;"><strong>Role Rate</strong> — set globally or per task. Defaults: Junior $35 | Mid $65 | Senior $95 | Executive $150/hr.</p>
+              <p style="margin-top:8px;"><strong>Headcount</strong> — number of people assigned to each task. Set globally or override per task.</p>
+              <p style="margin-top:8px;"><strong>Industry Multiplier</strong> — scales total value based on your industry's economic impact.</p>
+              <p style="margin-top:8px;"><strong>Chat Value</strong> — what this AI session was worth based on hours saved vs doing it manually.</p>
             </div>
             <button class="modal-close" onclick="closeFormulaModal()">✕ Close</button>
           </div>
@@ -1264,6 +1320,8 @@
   let calcAiPct = 1.0;
   let rawActionItems = [];
 
+  const roleRates = { Junior: 35, Mid: 65, Senior: 95, Executive: 150 };
+
   function setRole(btn, rate) {
     document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -1284,44 +1342,55 @@
     document.getElementById('mult-label').textContent = label;
   }
 
-  function parseDollar(str) {
-    if (typeof str === 'number') return str;
-    return parseFloat(String(str).replace(/[$,]/g, '')) || 0;
+  function getTaskRate(index) {
+    const el = document.getElementById('task-rate-' + index);
+    if (el && el.value) return parseFloat(el.value) || calcRate;
+    return calcRate;
+  }
+
+  function getTaskHeadcount(index) {
+    const el = document.getElementById('task-headcount-' + index);
+    if (el && el.value) return parseFloat(el.value) || 1;
+    return parseFloat(document.getElementById('calc-headcount')?.value) || 1;
   }
 
   function recalculate() {
-    const rate = parseFloat(document.getElementById('calc-rate').value) || 0;
-    const hours = parseFloat(document.getElementById('calc-hours').value) || 0;
     const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
+    const defaultHeadcount = parseFloat(document.getElementById('calc-headcount')?.value) || 1;
 
-    // Projected Value = sum of all action items × multiplier
     let projectedTotal = 0;
+
     if (rawActionItems.length > 0) {
-      rawActionItems.forEach(a => {
-        projectedTotal += parseDollar(a.projectedValue) * multiplier;
+      rawActionItems.forEach((a, i) => {
+        const rate = getTaskRate(i);
+        const headcount = getTaskHeadcount(i);
+        const hours = a.hoursToComplete || 0;
+        projectedTotal += hours * rate * headcount;
       });
-    } else {
-      projectedTotal = hours * rate * calcAiPct * multiplier;
+      projectedTotal = projectedTotal * multiplier;
     }
+
     projectedTotal = Math.round(projectedTotal / 50) * 50;
 
     document.getElementById('calc-output').textContent = '$' + projectedTotal.toLocaleString();
     document.getElementById('calc-formula-display').textContent =
-      `Sum of tasks × ${multiplier}x | $${rate}/hr × ${Math.round(calcAiPct * 100)}% AI`;
+      `Σ tasks × role rate × headcount × ${multiplier}x multiplier`;
 
-    // Update Section 1 projected value
     document.getElementById('out-projected').textContent = '$' + projectedTotal.toLocaleString();
   }
 
   function applyMultiplierToSection3() {
-    // Called on slider release — updates each task value in Section 3
     if (rawActionItems.length === 0) return;
     const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
     rawActionItems.forEach((a, i) => {
-      const adjusted = Math.round((parseDollar(a.projectedValue) * multiplier) / 50) * 50;
+      const rate = getTaskRate(i);
+      const headcount = getTaskHeadcount(i);
+      const hours = a.hoursToComplete || 0;
+      const adjusted = Math.round((hours * rate * headcount * multiplier) / 50) * 50;
       const valEl = document.getElementById('action-value-' + i);
       if (valEl) valEl.textContent = '$' + adjusted.toLocaleString();
     });
+    recalculate();
   }
 
   function showFormulaModal() {
@@ -1337,12 +1406,10 @@
     if (modal) modal.addEventListener('click', function(e) {
       if (e.target === this) closeFormulaModal();
     });
-    // Apply multiplier to Section 3 on slider release
     const slider = document.getElementById('calc-multiplier');
     if (slider) {
       slider.addEventListener('change', () => {
         applyMultiplierToSection3();
-        recalculate();
       });
     }
   });
@@ -1583,7 +1650,7 @@
 
       // Section 1
       document.getElementById('out-hours').textContent = summary.hoursSaved ?? '—';
-      document.getElementById('out-cost').textContent = summary.costBasis ?? '—';
+      document.getElementById('out-cost').textContent = summary.chatValue ?? '—';
       document.getElementById('out-projected').textContent = summary.projectedValue ?? '—';
       document.getElementById('out-category').textContent = summary.category ?? '—';
       document.getElementById('out-ai').textContent = summary.aiContribution ?? '—';
@@ -1599,7 +1666,6 @@
       // Wire calculator with report data
       const aiPct = parseFloat((summary.aiContribution || '85%').replace('%','')) / 100;
       calcAiPct = isNaN(aiPct) ? 0.85 : aiPct;
-      document.getElementById('calc-hours').value = summary.hoursSaved || 0;
 
       // Section 3 — store raw items FIRST then recalculate
       rawActionItems = actionItems;
@@ -1642,6 +1708,10 @@
   }
 
   function buildActionItem(a, i, statusClass, savedNote) {
+    const suggestedRate = roleRates[a.suggestedRole] || 65;
+    const defaultHeadcount = parseFloat(document.getElementById('calc-headcount')?.value) || 1;
+    const taskValue = Math.round((a.hoursToComplete || 0) * suggestedRate * defaultHeadcount / 50) * 50;
+
     return `
       <div class="action-item status-${statusClass}" id="action-${i}">
         <div class="action-main">
@@ -1654,8 +1724,8 @@
           </div>
           <div class="action-metrics-block">
             <div class="action-metrics-row">
-              <div class="action-hours">${a.hoursSaved}h saved</div>
-              <div class="action-value" id="action-value-${i}">${a.projectedValue}</div>
+              <div class="action-hours">${a.hoursToComplete || 0}h to complete</div>
+              <div class="action-value" id="action-value-${i}">$${taskValue.toLocaleString()}</div>
             </div>
             <div class="status-toggle">
               <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
@@ -1664,10 +1734,70 @@
             </div>
           </div>
         </div>
+        <!-- Per-task overrides -->
+        <div class="task-overrides">
+          <div class="task-override-field">
+            <label>Role</label>
+            <select id="task-role-${i}" onchange="updateTaskRole(${i})" class="task-select">
+              <option value="35" ${a.suggestedRole === 'Junior' ? 'selected' : ''}>Junior ($35/hr)</option>
+              <option value="65" ${a.suggestedRole === 'Mid' ? 'selected' : ''}>Mid ($65/hr)</option>
+              <option value="95" ${a.suggestedRole === 'Senior' ? 'selected' : ''}>Senior ($95/hr)</option>
+              <option value="150" ${a.suggestedRole === 'Executive' ? 'selected' : ''}>Executive ($150/hr)</option>
+            </select>
+          </div>
+          <div class="task-override-field">
+            <label>Headcount</label>
+            <input type="number" id="task-headcount-${i}" value="1" min="1" max="50"
+              class="task-number" oninput="updateTaskValue(${i})">
+          </div>
+          <div class="task-override-field">
+            <label>Hrs to Complete</label>
+            <input type="number" id="task-hours-${i}" value="${a.hoursToComplete || 0}" min="0" max="1000"
+              class="task-number" oninput="updateTaskHours(${i}, this.value)">
+          </div>
+        </div>
         <div class="action-notes-row">
           <textarea class="notes-field" id="action-note-${i}" placeholder="Add notes..." onchange="saveNote(${i})" onkeyup="saveNote(${i})">${savedNote}</textarea>
         </div>
       </div>`;
+  }
+
+  function getTaskRate(index) {
+    const el = document.getElementById('task-role-' + index);
+    if (el) return parseFloat(el.value) || calcRate;
+    return calcRate;
+  }
+
+  function getTaskHeadcount(index) {
+    const el = document.getElementById('task-headcount-' + index);
+    if (el) return parseFloat(el.value) || 1;
+    return parseFloat(document.getElementById('calc-headcount')?.value) || 1;
+  }
+
+  function getTaskHours(index) {
+    const el = document.getElementById('task-hours-' + index);
+    if (el) return parseFloat(el.value) || 0;
+    return rawActionItems[index]?.hoursToComplete || 0;
+  }
+
+  function updateTaskRole(index) {
+    updateTaskValue(index);
+  }
+
+  function updateTaskHours(index, val) {
+    if (rawActionItems[index]) rawActionItems[index].hoursToComplete = parseFloat(val) || 0;
+    updateTaskValue(index);
+  }
+
+  function updateTaskValue(index) {
+    const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
+    const rate = getTaskRate(index);
+    const headcount = getTaskHeadcount(index);
+    const hours = getTaskHours(index);
+    const adjusted = Math.round((hours * rate * headcount * multiplier) / 50) * 50;
+    const valEl = document.getElementById('action-value-' + index);
+    if (valEl) valEl.textContent = '$' + adjusted.toLocaleString();
+    recalculate();
   }
 
   function setActionStatus(index, newStatus) {
