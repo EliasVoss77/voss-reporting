@@ -1179,8 +1179,9 @@
           <div class="summary-grid">
             <div class="stat-box"><div class="stat-label">Hours Saved</div><div class="stat-value" id="out-hours">—</div></div>
             <div class="stat-box"><div class="stat-label">Chat Value</div><div class="stat-value blue" id="out-cost">—</div></div>
-            <div class="stat-box"><div class="stat-label">Projected Value</div><div class="stat-value" id="out-projected">—</div></div>
-            <div class="stat-box"><div class="stat-label">Category</div><div class="stat-value blue" style="font-size:0.95rem;" id="out-category">—</div></div>
+            <div class="stat-box"><div class="stat-label">Implementation Cost</div><div class="stat-value" id="out-impl-cost">—</div></div>
+            <div class="stat-box"><div class="stat-label">Projected Business Value</div><div class="stat-value blue" id="out-projected">—</div></div>
+            <div class="stat-box"><div class="stat-label">Category</div><div class="stat-value blue" style="font-size:0.85rem;" id="out-category">—</div></div>
           </div>
           <div class="contrib-row">
             <div class="contrib-box"><div class="stat-label">AI Contribution</div><div class="stat-value" id="out-ai">—</div></div>
@@ -1191,7 +1192,7 @@
 
         <!-- Section 1B: Value Calculator -->
         <div id="section-calculator" class="card" style="display:none;">
-          <div class="card-title">Section 1B — Value Calculator <span class="info-icon" onclick="showFormulaModal()">i</span></div>
+          <div class="card-title">Section 1B — Implementation Cost Calculator <span class="info-icon" onclick="showFormulaModal()">i</span></div>
 
           <div class="calc-section-label">// Default Role (applies to all tasks)</div>
           <div class="role-toggles">
@@ -1224,7 +1225,7 @@
 
           <div class="calc-result">
             <div>
-              <div class="calc-result-label">Adjusted Projected Value</div>
+              <div class="calc-result-label">Estimated Implementation Cost</div>
               <div class="calc-result-value" id="calc-output">$0</div>
             </div>
             <div class="calc-formula" id="calc-formula-display">
@@ -1233,7 +1234,7 @@
           </div>
 
           <div class="calc-pro-teaser">
-            <div class="calc-pro-text">🔒 Pro — Save rate presets, time horizon modeling, department benchmarks</div>
+            <div class="calc-pro-text">🔒 Pro — Save role presets, time horizon modeling, team cost templates</div>
             <button class="calc-pro-btn" onclick="alert('Pro plan coming soon!')">Upgrade to Pro</button>
           </div>
         </div>
@@ -1243,19 +1244,20 @@
           <div class="modal">
             <div class="modal-title">// How We Calculate</div>
             <div class="modal-body">
-              <p>VOSS projects value based on a transparent, adjustable formula:</p>
+              <p>VOSS tracks three distinct financial metrics:</p>
               <div class="modal-formula">
-                Projected Value =<br>
+                Chat Value =<br>
+                &nbsp;&nbsp;Hours Saved × $65/hr × AI Contribution %<br><br>
+                Implementation Cost =<br>
                 &nbsp;&nbsp;Σ (Hours to Complete × Role Rate × Headcount)<br>
                 &nbsp;&nbsp;× Industry Multiplier<br><br>
-                Chat Value =<br>
-                &nbsp;&nbsp;Hours Saved × $65/hr × AI Contribution %
+                Projected Business Value =<br>
+                &nbsp;&nbsp;AI estimate of business ROI when tasks complete
               </div>
-              <p><strong>Hours to Complete</strong> — realistic estimate of human hours needed to finish each task.</p>
-              <p style="margin-top:8px;"><strong>Role Rate</strong> — set globally or per task. Defaults: Junior $35 | Mid $65 | Senior $95 | Executive $150/hr.</p>
-              <p style="margin-top:8px;"><strong>Headcount</strong> — number of people assigned to each task. Set globally or override per task.</p>
-              <p style="margin-top:8px;"><strong>Industry Multiplier</strong> — scales total value based on your industry's economic impact.</p>
-              <p style="margin-top:8px;"><strong>Chat Value</strong> — what this AI session was worth based on hours saved vs doing it manually.</p>
+              <p><strong>Chat Value</strong> — what this AI session saved in time and money.</p>
+              <p style="margin-top:8px;"><strong>Implementation Cost</strong> — realistic labor cost to complete all planned tasks. Adjust role, headcount, and hours per task.</p>
+              <p style="margin-top:8px;"><strong>Projected Business Value</strong> — estimated economic value the business gains when these tasks are completed. Based on impact type and industry multipliers.</p>
+              <p style="margin-top:8px;"><strong>Industry Multiplier</strong> — scales implementation cost estimate based on your industry's labor market.</p>
             </div>
             <button class="modal-close" onclick="closeFormulaModal()">✕ Close</button>
           </div>
@@ -1376,7 +1378,8 @@
     document.getElementById('calc-formula-display').textContent =
       `Σ tasks × role rate × headcount × ${multiplier}x multiplier`;
 
-    document.getElementById('out-projected').textContent = '$' + projectedTotal.toLocaleString();
+    // Update Section 1 implementation cost (not projected business value)
+    document.getElementById('out-impl-cost').textContent = '$' + projectedTotal.toLocaleString();
   }
 
   function applyMultiplierToSection3() {
@@ -1651,7 +1654,8 @@
       // Section 1
       document.getElementById('out-hours').textContent = summary.hoursSaved ?? '—';
       document.getElementById('out-cost').textContent = summary.chatValue ?? '—';
-      document.getElementById('out-projected').textContent = summary.projectedValue ?? '—';
+      document.getElementById('out-projected').textContent = summary.projectedBusinessValue ?? '—';
+      document.getElementById('out-impl-cost').textContent = '—'; // populated by calculator
       document.getElementById('out-category').textContent = summary.category ?? '—';
       document.getElementById('out-ai').textContent = summary.aiContribution ?? '—';
       document.getElementById('out-human').textContent = summary.humanContribution ?? '—';
