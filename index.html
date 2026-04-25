@@ -1592,18 +1592,17 @@
       document.getElementById('section-summary').style.display = 'block';
       document.getElementById('section-calculator').style.display = 'block';
 
-      // Wire calculator with report data
-      const aiPct = parseFloat((summary.aiContribution || '85%').replace('%','')) / 100;
-      calcAiPct = isNaN(aiPct) ? 0.85 : aiPct;
-      document.getElementById('calc-hours').value = summary.hoursSaved || 0;
-      recalculate();
-
       // Section 2
       document.getElementById('out-recap').textContent = chatRecap;
       document.getElementById('section-recap').style.display = 'block';
 
-      // Section 3
-      rawActionItems = actionItems; // store for calculator
+      // Wire calculator with report data
+      const aiPct = parseFloat((summary.aiContribution || '85%').replace('%','')) / 100;
+      calcAiPct = isNaN(aiPct) ? 0.85 : aiPct;
+      document.getElementById('calc-hours').value = summary.hoursSaved || 0;
+
+      // Section 3 — store raw items FIRST then recalculate
+      rawActionItems = actionItems;
       const actionsEl = document.getElementById('out-actions');
       actionsEl.innerHTML = '';
       actionItems.forEach((a, i) => {
@@ -1613,6 +1612,9 @@
       });
       document.getElementById('section-actions').style.display = 'block';
       document.getElementById('export-row').style.display = 'flex';
+
+      // Now recalculate with all action items loaded
+      recalculate();
 
       // Save to Supabase
       if (currentUser) {
