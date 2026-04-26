@@ -1085,6 +1085,7 @@
       <input type="password" id="login-password" placeholder="Password" />
       <div id="login-message" class="auth-message"></div>
       <button class="auth-btn" onclick="handleLogin()">⚡ Sign In</button>
+      <button onclick="handleForgotPassword()" style="background:transparent;border:none;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:0.72rem;cursor:pointer;letter-spacing:0.05em;text-align:center;margin-top:4px;" type="button">Forgot password?</button>
     </div>
 
     <!-- Signup Form -->
@@ -1179,7 +1180,7 @@
           <div class="summary-grid">
             <div class="stat-box"><div class="stat-label">Hours Saved</div><div class="stat-value" id="out-hours">—</div></div>
             <div class="stat-box"><div class="stat-label">Chat Value</div><div class="stat-value blue" id="out-cost">—</div></div>
-            <div class="stat-box"><div class="stat-label">Projected Business Value</div><div class="stat-value" id="out-projected">—</div></div>
+            <div class="stat-box"><div class="stat-label">Projected Business Value</div><div class="stat-value" id="out-projected">—</div><div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);margin-top:6px;line-height:1.5;" id="out-projected-breakdown"></div></div>
             <div class="stat-box"><div class="stat-label">Category</div><div class="stat-value blue" style="font-size:0.85rem;" id="out-category">—</div></div>
           </div>
           <div class="contrib-row">
@@ -1494,6 +1495,22 @@
     el.style.display = 'block';
   }
 
+  async function handleForgotPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      showAuthMessage('login', 'Enter your email address above first', 'error');
+      return;
+    }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://app.vossintel.com'
+    });
+    if (error) {
+      showAuthMessage('login', error.message, 'error');
+    } else {
+      showAuthMessage('login', '✓ Password reset email sent! Check your inbox.', 'success');
+    }
+  }
+
   async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -1589,11 +1606,13 @@
     document.getElementById('out-hours').textContent = r.hours_saved ?? '—';
     document.getElementById('out-cost').textContent = '—';
     document.getElementById('out-projected').textContent = r.projected_value ?? '—';
+    document.getElementById('out-projected-breakdown').textContent = 'From saved report';
     document.getElementById('out-category').textContent = r.category ?? '—';
     document.getElementById('out-ai').textContent = r.ai_contribution ?? '—';
     document.getElementById('out-human').textContent = r.human_contribution ?? '—';
     document.getElementById('out-source').textContent = `Source: ${r.name} — ${r.department}`;
     document.getElementById('section-summary').style.display = 'block';
+    document.getElementById('section-calculator').style.display = 'block';
 
     document.getElementById('out-recap').textContent = r.chat_recap || '—';
     document.getElementById('section-recap').style.display = 'block';
@@ -1601,6 +1620,7 @@
     const actionsEl = document.getElementById('out-actions');
     actionsEl.innerHTML = '';
     const items = r.action_items || [];
+    rawActionItems = items;
     items.forEach((a, i) => {
       const statusClass = (a.status || 'Planned').replace(' ', '-');
       actionsEl.innerHTML += buildActionItem(a, i, statusClass, '');
@@ -1686,6 +1706,7 @@
       document.getElementById('out-hours').textContent = summary.hoursSaved ?? '—';
       document.getElementById('out-cost').textContent = summary.chatValue ?? '—';
       document.getElementById('out-projected').textContent = summary.projectedBusinessValue ?? '—';
+      document.getElementById('out-projected-breakdown').textContent = summary.projectedValueBreakdown ?? '';
       document.getElementById('out-category').textContent = summary.category ?? '—';
       document.getElementById('out-ai').textContent = summary.aiContribution ?? '—';
       document.getElementById('out-human').textContent = summary.humanContribution ?? '—';
@@ -1724,7 +1745,7 @@
           department: latestReport.department,
           category: summary.category || 'Uncategorized',
           hours_saved: summary.hoursSaved || 0,
-          projected_value: summary.projectedValue || '$0',
+          projected_value: summary.projectedBusinessValue || '$0',
           ai_contribution: summary.aiContribution || '0%',
           human_contribution: summary.humanContribution || '0%',
           chat_recap: chatRecap,
@@ -1742,9 +1763,9 @@
   }
 
   function buildActionItem(a, i, statusClass, savedNote) {
-    const suggestedRate = roleRates[a.suggestedRole] || 65;
+    const defaultRate = parseFloat(document.getElementById('calc-rate')?.value) || 65;
     const defaultHeadcount = parseFloat(document.getElementById('calc-headcount')?.value) || 1;
-    const taskValue = Math.round((a.hoursToComplete || 0) * suggestedRate * defaultHeadcount / 50) * 50;
+    const implCost = Math.round((a.hoursToComplete || 0) * defaultRate * defaultHeadcount / 50) * 50;
 
     return `
       <div class="action-item status-${statusClass}" id="action-${i}">
@@ -1757,9 +1778,11 @@
             </div>
           </div>
           <div class="action-metrics-block">
-            <div class="action-metrics-row">
-              <div class="action-hours">Impl. Cost:</div>
-              <div class="action-value" id="action-value-${i}">$${taskValue.toLocaleString()}</div>
+            <div style="text-align:right;">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;">Value</div>
+              <div class="action-value" id="action-value-${i}">${a.taskValue || '$0'}</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-top:6px;">Cost</div>
+              <div class="action-hours" id="action-cost-${i}">$${implCost.toLocaleString()}</div>
             </div>
             <div class="status-toggle">
               <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
@@ -1770,19 +1793,17 @@
         </div>
         <!-- Per-task overrides -->
         <div class="task-overrides">
-          <div class="task-override-field">
-            <label>Role</label>
-            <select id="task-role-${i}" onchange="updateTaskRole(${i})" class="task-select">
-              <option value="35" ${a.suggestedRole === 'Junior' ? 'selected' : ''}>Junior ($35/hr)</option>
-              <option value="65" ${a.suggestedRole === 'Mid' ? 'selected' : ''}>Mid ($65/hr)</option>
-              <option value="95" ${a.suggestedRole === 'Senior' ? 'selected' : ''}>Senior ($95/hr)</option>
-              <option value="150" ${a.suggestedRole === 'Executive' ? 'selected' : ''}>Executive ($150/hr)</option>
-            </select>
+          <div class="task-override-field" style="flex:2;">
+            <label>Pay Rate — <span id="task-rate-label-${i}">$${defaultRate}/hr</span></label>
+            <input type="range" id="task-rate-slider-${i}" min="10" max="200" step="1" value="${defaultRate}"
+              oninput="updateTaskRateLabel(${i}); updateTaskCost(${i})"
+              onchange="updateTaskCost(${i})">
+            <div class="calc-range-row"><span>$10</span><span>$65 Mid</span><span>$200</span></div>
           </div>
           <div class="task-override-field">
             <label>Headcount</label>
-            <input type="number" id="task-headcount-${i}" value="1" min="1" max="50"
-              class="task-number" oninput="updateTaskValue(${i})">
+            <input type="number" id="task-headcount-${i}" value="${defaultHeadcount}" min="1" max="50"
+              class="task-number" oninput="updateTaskCost(${i})">
           </div>
           <div class="task-override-field">
             <label>Hrs to Complete</label>
@@ -1797,7 +1818,7 @@
   }
 
   function getTaskRate(index) {
-    const el = document.getElementById('task-role-' + index);
+    const el = document.getElementById('task-rate-slider-' + index);
     if (el) return parseFloat(el.value) || calcRate;
     return calcRate;
   }
@@ -1814,24 +1835,9 @@
     return rawActionItems[index]?.hoursToComplete || 0;
   }
 
-  function updateTaskRole(index) {
-    updateTaskValue(index);
-  }
-
   function updateTaskHours(index, val) {
     if (rawActionItems[index]) rawActionItems[index].hoursToComplete = parseFloat(val) || 0;
-    updateTaskValue(index);
-  }
-
-  function updateTaskValue(index) {
-    const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
-    const rate = getTaskRate(index);
-    const headcount = getTaskHeadcount(index);
-    const hours = getTaskHours(index);
-    const adjusted = Math.round((hours * rate * headcount * multiplier) / 50) * 50;
-    const valEl = document.getElementById('action-value-' + index);
-    if (valEl) valEl.textContent = '$' + adjusted.toLocaleString();
-    recalculate();
+    updateTaskCost(index);
   }
 
   function setActionStatus(index, newStatus) {
