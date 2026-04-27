@@ -1354,7 +1354,8 @@
     else label = `$${val}/hr (Executive / Director)`;
     document.getElementById('rate-label').textContent = label;
     document.getElementById('calc-rate').value = val;
-    calcRate = val;
+    calcRate = val; // sync global variable
+    recalculate(); // recalculate immediately
   }
 
   function syncRateFromInput() {
@@ -1396,7 +1397,7 @@
 
   function recalculate() {
     const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
-    const rate = parseFloat(document.getElementById('calc-rate').value) || 65;
+    const rate = calcRate || parseFloat(document.getElementById('calc-rate').value) || 65;
     const headcount = parseFloat(document.getElementById('calc-headcount')?.value) || 1;
     let total = 0;
 
@@ -1444,9 +1445,9 @@
       if (e.target === this) closeFormulaModal();
     });
     const slider = document.getElementById('calc-multiplier');
-    if (slider) slider.addEventListener('change', () => applyMultiplierToSection3());
+    if (slider) slider.addEventListener('input', () => { applyMultiplierToSection3(); recalculate(); });
     const rateSlider = document.getElementById('calc-rate-slider');
-    if (rateSlider) rateSlider.addEventListener('change', () => applyMultiplierToSection3());
+    if (rateSlider) rateSlider.addEventListener('input', () => { updateRateLabel(); applyMultiplierToSection3(); recalculate(); });
   });
 
 
@@ -1604,7 +1605,7 @@
     el.classList.add('active');
 
     document.getElementById('out-hours').textContent = r.hours_saved ?? '—';
-    document.getElementById('out-cost').textContent = '—';
+    document.getElementById('out-cost').textContent = r.chat_value || '—';
     document.getElementById('out-projected').textContent = r.projected_value ?? '—';
     document.getElementById('out-projected-breakdown').textContent = 'From saved report';
     document.getElementById('out-category').textContent = r.category ?? '—';
@@ -1749,7 +1750,8 @@
           ai_contribution: summary.aiContribution || '0%',
           human_contribution: summary.humanContribution || '0%',
           chat_recap: chatRecap,
-          action_items: actionItems
+          action_items: actionItems,
+          chat_value: summary.chatValue || '$0'
         });
         loadReportHistory();
       }
@@ -1796,8 +1798,7 @@
           <div class="task-override-field" style="flex:2;">
             <label>Pay Rate — <span id="task-rate-label-${i}">$${defaultRate}/hr</span></label>
             <input type="range" id="task-rate-slider-${i}" min="10" max="200" step="1" value="${defaultRate}"
-              oninput="updateTaskRateLabel(${i}); updateTaskCost(${i})"
-              onchange="updateTaskCost(${i})">
+              oninput="updateTaskRateLabel(${i}); updateTaskCost(${i})">
             <div class="calc-range-row"><span>$10</span><span>$65 Mid</span><span>$200</span></div>
           </div>
           <div class="task-override-field">
@@ -1838,6 +1839,14 @@
   function updateTaskHours(index, val) {
     if (rawActionItems[index]) rawActionItems[index].hoursToComplete = parseFloat(val) || 0;
     updateTaskCost(index);
+  }
+
+  function updateTaskRateLabel(index) {
+    const el = document.getElementById('task-rate-slider-' + index);
+    if (!el) return;
+    const val = parseInt(el.value);
+    const labelEl = document.getElementById('task-rate-label-' + index);
+    if (labelEl) labelEl.textContent = `$${val}/hr`;
   }
 
   function setActionStatus(index, newStatus) {
