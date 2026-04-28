@@ -1419,14 +1419,19 @@
 
   function applyMultiplierToSection3() {
     if (rawActionItems.length === 0) return;
-    const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
+    rawActionItems.forEach((a, i) => updateTaskCost(i));
+    recalculate();
+  }
+
+  function applyGlobalRateToSection3() {
+    // Sync global rate to all per-task sliders
+    if (rawActionItems.length === 0) return;
     rawActionItems.forEach((a, i) => {
-      const rate = getTaskRate(i);
-      const headcount = getTaskHeadcount(i);
-      const hours = getTaskHours(i);
-      const adjusted = Math.round((hours * rate * headcount * multiplier) / 50) * 50;
-      const valEl = document.getElementById('action-value-' + i);
-      if (valEl) valEl.textContent = '$' + adjusted.toLocaleString();
+      const taskSlider = document.getElementById('task-rate-slider-' + i);
+      const taskLabel = document.getElementById('task-rate-label-' + i);
+      if (taskSlider) taskSlider.value = calcRate;
+      if (taskLabel) taskLabel.textContent = `$${calcRate}/hr`;
+      updateTaskCost(i);
     });
     recalculate();
   }
@@ -1445,9 +1450,9 @@
       if (e.target === this) closeFormulaModal();
     });
     const slider = document.getElementById('calc-multiplier');
-    if (slider) slider.addEventListener('input', () => { applyMultiplierToSection3(); recalculate(); });
+    if (slider) slider.addEventListener('input', () => { applyMultiplierToSection3(); });
     const rateSlider = document.getElementById('calc-rate-slider');
-    if (rateSlider) rateSlider.addEventListener('input', () => { updateRateLabel(); applyMultiplierToSection3(); recalculate(); });
+    if (rateSlider) rateSlider.addEventListener('input', () => { updateRateLabel(); applyGlobalRateToSection3(); });
   });
 
 
