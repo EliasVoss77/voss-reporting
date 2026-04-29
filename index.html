@@ -328,11 +328,27 @@
   .report-log::-webkit-scrollbar-track { background: transparent; }
   .report-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+  .report-log-delete {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 2px;
+    float: right;
+    margin-top: -20px;
+  }
+
+  .report-log-item:hover .report-log-delete { display: block; }
+
   .report-log-item {
     padding: 10px 20px;
     cursor: pointer;
     border-left: 2px solid transparent;
     transition: all 0.15s;
+    position: relative;
   }
 
   .report-log-item:hover { background: var(--surface2); border-left-color: var(--muted); }
@@ -598,6 +614,8 @@
   .stat-label { font-size: 0.62rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; font-family: 'Share Tech Mono', monospace; margin-bottom: 8px; }
   .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
   .stat-value.blue { color: var(--accent2); }
+  .stat-box { overflow: hidden; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; word-break: break-word; overflow-wrap: break-word; }
 
   .contrib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .contrib-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 14px; text-align: center; }
@@ -1722,6 +1740,13 @@
   }
 
   // ─── REPORT HISTORY ───
+  async function deleteReport(id, event) {
+    event.stopPropagation();
+    if (!confirm('Delete this report?')) return;
+    const { error } = await sb.from('reports').delete().eq('id', id).eq('user_id', currentUser.id);
+    if (!error) loadReportHistory();
+  }
+
   async function loadReportHistory() {
     if (!currentUser) return;
     const { data, error } = await sb
@@ -1749,8 +1774,13 @@
         <div class="report-log-meta">
           <span class="report-log-value">${r.projected_value || '—'}</span>
           <span class="report-log-date">${date}</span>
-        </div>`;
-      item.onclick = () => loadHistoricalReport(r, item);
+        </div>
+        <button class="report-log-delete" onclick="deleteReport('${r.id}', event)" title="Delete report">✕</button>`;
+      item.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('report-log-delete')) {
+          loadHistoricalReport(r, item);
+        }
+      });
       log.appendChild(item);
     });
   }
@@ -1938,7 +1968,7 @@
 
       // Save to Supabase
       if (currentUser) {
-        await sb.from('reports').insert({
+        const { error: saveError } = await sb.from('reports').insert({
           user_id: currentUser.id,
           name: latestReport.name,
           department: latestReport.department,
@@ -1951,10 +1981,16 @@
           action_items: actionItems,
           chat_value: summary.chatValue || '$0'
         });
-        loadReportHistory();
+        if (saveError) {
+          console.error('Save error:', saveError);
+          setStatus('Analysis complete — note: save failed (' + saveError.message + ')', 'error');
+        } else {
+          loadReportHistory();
+          setStatus('Analysis complete — saved to your profile ✓', 'success');
+        }
+      } else {
+        setStatus('Analysis complete', 'success');
       }
-
-      setStatus('Analysis complete — saved to your profile ✓', 'success');
 
     } catch (err) {
       console.error(err);
@@ -2045,6 +2081,18 @@
     const val = parseInt(el.value);
     const labelEl = document.getElementById('task-rate-label-' + index);
     if (labelEl) labelEl.textContent = `$${val}/hr`;
+    updateTaskCost(index);
+  }
+
+  function updateTaskCost(index) {
+    const rate = getTaskRate(index);
+    const headcount = getTaskHeadcount(index);
+    const hours = getTaskHours(index);
+    const multiplier = parseFloat(document.getElementById('calc-multiplier')?.value) || 1.0;
+    const cost = Math.round((hours * rate * headcount * multiplier) / 50) * 50;
+    const costEl = document.getElementById('action-cost-' + index);
+    if (costEl) costEl.textContent = '$' + cost.toLocaleString();
+    recalculate();
   }
 
   function setActionStatus(index, newStatus) {
