@@ -742,6 +742,77 @@
   .report-dept { font-size: 0.75rem; color: var(--accent2); font-family: 'Share Tech Mono', monospace; }
   .report-preview { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
 
+  /* ─── SHARE LINK ─── */
+  .share-link-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .share-link-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .share-link-input::placeholder { color: var(--muted); font-size: 0.85rem; }
+  .share-link-input:focus { border-color: var(--accent2); }
+
+  .share-link-btn {
+    padding: 10px 18px;
+    background: var(--accent2);
+    color: #000;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .share-link-btn:hover { background: #00a8cc; }
+  .share-link-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .share-link-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    min-height: 16px;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .share-link-status.success { color: var(--accent); }
+  .share-link-status.error { color: var(--danger); }
+  .share-link-status.loading { color: var(--accent2); }
+
+  /* ─── JSON PICKER ─── */
+  .json-picker {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .json-picker-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
   /* ─── FILE UPLOAD ─── */
   .upload-zone {
     border: 2px dashed var(--border);
@@ -1338,6 +1409,13 @@
               <input type="text" id="rep-department" placeholder="Department — Position">
             </div>
 
+            <!-- Share Link Input -->
+            <div class="share-link-row">
+              <input type="url" id="share-link-input" placeholder="Paste ChatGPT or Claude share link..." class="share-link-input">
+              <button type="button" class="share-link-btn" onclick="fetchShareLink()">Fetch</button>
+            </div>
+            <div id="share-link-status" class="share-link-status"></div>
+
             <!-- File Upload Zone -->
             <div class="upload-zone" id="upload-zone"
               ondragover="handleDragOver(event)"
@@ -1352,7 +1430,15 @@
             <input type="file" id="file-input" accept=".pdf,.txt,.md,.json,.html"
               style="display:none" onchange="handleFileSelect(event)">
 
-            <textarea id="rep-issue" placeholder="Paste chat transcript here, or upload a file above..." required></textarea>
+            <!-- JSON Conversation Picker (shows when multi-chat JSON detected) -->
+            <div id="json-picker" style="display:none;" class="json-picker">
+              <div class="json-picker-label">// Select conversation to analyze</div>
+              <select id="json-conversation-select" class="task-select" style="width:100%;margin-bottom:10px;">
+              </select>
+              <button type="button" class="btn btn-secondary" style="width:100%;" onclick="loadSelectedConversation()">Load Selected Conversation</button>
+            </div>
+
+            <textarea id="rep-issue" placeholder="Paste chat transcript here, upload a file, or use a share link above..." required></textarea>
             <button type="submit" class="btn btn-primary">Submit Report</button>
           </form>
         </div>
@@ -1727,6 +1813,61 @@
     document.getElementById('user-avatar').textContent = initials;
   }
 
+  // ─── SHARE LINK FETCHER ───
+  let parsedConversations = [];
+
+  async function fetchShareLink() {
+    const input = document.getElementById('share-link-input');
+    const status = document.getElementById('share-link-status');
+    const btn = document.querySelector('.share-link-btn');
+    const url = input.value.trim();
+
+    if (!url) { setShareStatus('Enter a share link first', 'error'); return; }
+    if (!url.startsWith('http')) { setShareStatus('Please enter a valid URL', 'error'); return; }
+
+    setShareStatus('⏳ Fetching conversation...', 'loading');
+    btn.disabled = true;
+
+    try {
+      const response = await fetch(WORKER_URL + '/fetch-share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'Failed to fetch conversation');
+      }
+
+      document.getElementById('rep-issue').value = data.text;
+      setShareStatus('✓ Conversation loaded successfully!', 'success');
+      input.value = '';
+
+    } catch (err) {
+      setShareStatus('✕ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function setShareStatus(msg, type) {
+    const el = document.getElementById('share-link-status');
+    el.textContent = msg;
+    el.className = 'share-link-status ' + type;
+  }
+
+  // Allow Enter key on share link input
+  document.addEventListener('DOMContentLoaded', () => {
+    const shareInput = document.getElementById('share-link-input');
+    if (shareInput) {
+      shareInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); fetchShareLink(); }
+      });
+    }
+  });
+
   // ─── FILE UPLOAD ───
   function handleDragOver(e) {
     e.preventDefault();
@@ -1812,21 +1953,29 @@
     const json = JSON.parse(text);
 
     // ChatGPT export: array of conversations
-    if (Array.isArray(json)) {
-      const parts = [];
-      json.forEach(convo => {
-        if (convo.mapping) {
-          Object.values(convo.mapping).forEach(node => {
-            const msg = node.message;
-            if (msg?.content?.parts) {
-              const role = msg.author?.role === 'user' ? 'User' : 'Assistant';
-              const content = msg.content.parts.join(' ').trim();
-              if (content) parts.push(role + ': ' + content);
-            }
-          });
-        }
+    if (Array.isArray(json) && json.length > 0 && json[0].mapping) {
+      parsedConversations = json;
+
+      if (json.length === 1) {
+        // Single conversation — just load it
+        return extractSingleChatGPTConvo(json[0]);
+      }
+
+      // Multiple conversations — show picker
+      const select = document.getElementById('json-conversation-select');
+      select.innerHTML = '';
+      json.forEach((convo, i) => {
+        const title = convo.title || 'Conversation ' + (i + 1);
+        const date = convo.create_time
+          ? new Date(convo.create_time * 1000).toLocaleDateString()
+          : '';
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = title + (date ? ' — ' + date : '');
+        select.appendChild(opt);
       });
-      if (parts.length > 0) return parts.join('\n\n');
+      document.getElementById('json-picker').style.display = 'block';
+      return ''; // textarea stays empty until user picks one
     }
 
     // Claude / generic messages array
@@ -1841,6 +1990,36 @@
     }
 
     return JSON.stringify(json, null, 2);
+  }
+
+  function extractSingleChatGPTConvo(convo) {
+    if (!convo.mapping) return '';
+    const parts = [];
+    // Sort nodes by create_time to preserve order
+    const nodes = Object.values(convo.mapping)
+      .filter(n => n.message?.content?.parts?.length > 0)
+      .sort((a, b) => (a.message.create_time || 0) - (b.message.create_time || 0));
+    nodes.forEach(node => {
+      const msg = node.message;
+      const role = msg.author?.role === 'user' ? 'User' : 'Assistant';
+      const content = msg.content.parts.join(' ').trim();
+      if (content && content !== 'undefined') parts.push(role + ': ' + content);
+    });
+    return parts.join('\n\n');
+  }
+
+  function loadSelectedConversation() {
+    const select = document.getElementById('json-conversation-select');
+    const index = parseInt(select.value);
+    const convo = parsedConversations[index];
+    if (!convo) return;
+    const text = extractSingleChatGPTConvo(convo);
+    document.getElementById('rep-issue').value = text;
+    document.getElementById('json-picker').style.display = 'none';
+    const zone = document.getElementById('upload-zone');
+    const status = document.getElementById('upload-status');
+    zone.classList.add('success');
+    status.textContent = '✓ Loaded: ' + (convo.title || 'Conversation') + ' (' + text.length.toLocaleString() + ' chars)';
   }
 
   // ─── AUTH FUNCTIONS ───
