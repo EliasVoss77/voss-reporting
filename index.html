@@ -1,339 +1,2539 @@
-export default {
-  async fetch(request, env) {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOSS Intel — AI Value Reports</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #090c10;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: #21262d;
+    --accent: #00ff88;
+    --accent2: #00c8ff;
+    --danger: #ff4d6d;
+    --yellow: #f0b429;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --sidebar-w: 280px;
+    --glow: 0 0 20px rgba(0,255,136,0.15);
+  }
 
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, x-api-key"
-    };
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── AUTH SCREEN ─── */
+  #auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #auth-screen::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .auth-logo h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 2.2rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,255,136,0.4);
+  }
+
+  .auth-logo p {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+    margin-top: 4px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+
+  .auth-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+  .auth-form input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .auth-form input::placeholder { color: var(--muted); }
+  .auth-form input:focus { border-color: var(--accent); }
+
+  .auth-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .auth-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+  }
+
+  .auth-checkbox a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .auth-btn {
+    padding: 14px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .auth-btn:hover { background: #00e07a; box-shadow: var(--glow); }
+
+  .auth-message {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 10px;
+    border-radius: 3px;
+    display: none;
+  }
+
+  .auth-message.success { background: rgba(0,255,136,0.08); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
+  .auth-message.error { background: rgba(255,77,109,0.08); color: var(--danger); border: 1px solid rgba(255,77,109,0.2); }
+
+  /* ─── APP LAYOUT ─── */
+  #app-screen { display: none; min-height: 100vh; }
+
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+
+  .sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .sidebar-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  .sidebar-logo {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+
+  .sidebar-logo span {
+    display: block;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-user {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: #000;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .user-info { flex: 1; min-width: 0; }
+  .user-email {
+    font-size: 0.78rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .user-plan {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .sidebar-section-label {
+    padding: 16px 20px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .sidebar-new-btn {
+    margin: 0 12px 8px;
+    padding: 10px 16px;
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 3px;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sidebar-new-btn:hover { background: rgba(0,255,136,0.15); }
+
+  .report-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+
+  .report-log::-webkit-scrollbar { width: 4px; }
+  .report-log::-webkit-scrollbar-track { background: transparent; }
+  .report-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .report-log-delete {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 2px;
+    float: right;
+    margin-top: -20px;
+  }
+
+  .report-log-item:hover .report-log-delete { display: block; }
+
+  .report-log-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .report-log-item:hover { background: var(--surface2); border-left-color: var(--muted); }
+  .report-log-item.active { background: var(--surface2); border-left-color: var(--accent); }
+
+  .report-log-category {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+
+  .report-log-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .report-log-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+  }
+
+  .report-log-date {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .report-log-empty {
+    padding: 20px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sidebar-footer-links {
+    display: flex;
+    gap: 12px;
+  }
+
+  .sidebar-footer-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .sidebar-footer-links a:hover { color: var(--accent); }
+
+  .signout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .signout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ─── MAIN CONTENT ─── */
+  .main-content {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .main-content::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .main-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Mobile toggle */
+  .sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 200;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .sidebar-toggle { display: block; }
+    .main-content { margin-left: 0; }
+    .main-inner { padding: 60px 16px 80px; }
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0.6;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--muted); font-size: 0.9rem; }
+  input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,255,136,0.08); }
+  textarea { resize: vertical; min-height: 120px; margin-bottom: 12px; }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary { background: var(--accent); color: #000; width: 100%; font-weight: 700; }
+  .btn-primary:hover { background: #00e07a; box-shadow: var(--glow); transform: translateY(-1px); }
+
+  .btn-row { display: flex; gap: 10px; margin-bottom: 24px; }
+
+  .btn-secondary { flex: 1; background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
+  .btn-secondary:hover { background: rgba(0,200,255,0.08); }
+
+  .btn-ghost { flex: 1; background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
+
+  #status-bar {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+
+  #status-bar.success { border-color: var(--accent); color: var(--accent); }
+  #status-bar.error { border-color: var(--danger); color: var(--danger); }
+  #status-bar.loading { border-color: var(--accent2); color: var(--accent2); }
+
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .loading .status-dot { animation: pulse 1s infinite; }
+
+  /* ─── SECTION 1 ─── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 16px; text-align: center; }
+  .stat-label { font-size: 0.62rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; font-family: 'Share Tech Mono', monospace; margin-bottom: 8px; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat-value.blue { color: var(--accent2); }
+  .stat-box { overflow: hidden; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; word-break: break-word; overflow-wrap: break-word; }
+
+  .contrib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .contrib-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 14px; text-align: center; }
+
+  .analysis-source { font-size: 0.75rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; padding: 10px 0 0; border-top: 1px solid var(--border); margin-top: 12px; }
+
+  /* ─── SECTION 2 ─── */
+  .chat-recap { font-size: 1rem; line-height: 1.8; color: var(--text); font-weight: 400; letter-spacing: 0.02em; }
+
+  /* ─── SECTION 3 ─── */
+  .action-table-header {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 20px;
+    padding: 0 16px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .action-col-label { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+
+  .action-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .action-item:hover { border-color: var(--muted); }
+  .action-item.status-Complete { border-left: 3px solid var(--accent); }
+  .action-item.status-In-Progress { border-left: 3px solid var(--yellow); }
+  .action-item.status-Planned { border-left: 3px solid var(--danger); }
+
+  .action-main {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .action-main-top { display: contents; }
+
+  .action-light { width: 14px; height: 14px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; box-shadow: 0 0 10px currentColor; }
+  .light-Complete { background: var(--accent); color: var(--accent); }
+  .light-In-Progress { background: var(--yellow); color: var(--yellow); }
+  .light-Planned { background: var(--danger); color: var(--danger); }
+
+  .action-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; overflow-wrap: break-word; word-break: break-word; }
+  .action-rationale { font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.4; overflow-wrap: break-word; word-break: break-word; }
+
+  .action-metrics-block { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; margin-left: auto; text-align: right; }
+  .action-metrics-row { display: flex; gap: 14px; align-items: baseline; }
+  .action-hours { font-family: 'Share Tech Mono', monospace; font-size: 1rem; color: var(--accent2); font-weight: 700; text-align: right; }
+  .action-value { font-family: 'Share Tech Mono', monospace; font-size: 1rem; color: var(--accent); font-weight: 700; text-align: right; }
+
+  .status-toggle { display: flex; gap: 5px; flex-shrink: 0; justify-content: flex-end; }
+
+  .status-btn {
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-size: 0.62rem;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .status-btn:hover { color: var(--text); border-color: var(--muted); }
+  .status-btn.active-Complete { background: rgba(0,255,136,0.1); color: var(--accent); border-color: var(--accent); }
+  .status-btn.active-In-Progress { background: rgba(240,180,41,0.1); color: var(--yellow); border-color: var(--yellow); }
+  .status-btn.active-Planned { background: rgba(255,77,109,0.1); color: var(--danger); border-color: var(--danger); }
+
+  .action-notes-row { padding-top: 10px; border-top: 1px solid var(--border); }
+
+  .notes-field {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    resize: none;
+    height: 36px;
+    overflow: hidden;
+    transition: border-color 0.2s, height 0.2s;
+    outline: none;
+    display: block;
+  }
+
+  .notes-field::placeholder { color: var(--muted); font-size: 0.82rem; }
+  .notes-field:focus { border-color: var(--accent2); height: 72px; }
+
+  /* Mobile action layout */
+  @media (max-width: 600px) {
+    .action-table-header { display: none; }
+    .action-main { display: flex; flex-direction: column; gap: 10px; }
+    .action-main-top { display: flex; gap: 10px; align-items: flex-start; }
+    .action-metrics-block { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-left: 0; text-align: left; width: 100%; }
+    .action-metrics-row { display: flex; gap: 16px; align-items: baseline; width: 100%; }
+    .status-toggle { justify-content: flex-start; flex-wrap: wrap; width: 100%; }
+  }
+
+  .report-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 3px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .report-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .report-name { font-weight: 700; font-size: 1rem; }
+  .report-dept { font-size: 0.75rem; color: var(--accent2); font-family: 'Share Tech Mono', monospace; }
+  .report-preview { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* ─── SHARE LINK ─── */
+  .share-link-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .share-link-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .share-link-input::placeholder { color: var(--muted); font-size: 0.85rem; }
+  .share-link-input:focus { border-color: var(--accent2); }
+
+  .share-link-btn {
+    padding: 10px 18px;
+    background: var(--accent2);
+    color: #000;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .share-link-btn:hover { background: #00a8cc; }
+  .share-link-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .share-link-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    min-height: 16px;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .share-link-status.success { color: var(--accent); }
+  .share-link-status.error { color: var(--danger); }
+  .share-link-status.loading { color: var(--accent2); }
+
+  /* ─── JSON PICKER ─── */
+  .json-picker {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .json-picker-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ─── FILE UPLOAD ─── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+    background: var(--surface2);
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(0,255,136,0.04);
+  }
+
+  .upload-zone.success {
+    border-color: var(--accent);
+    border-style: solid;
+    background: rgba(0,255,136,0.06);
+  }
+
+  .upload-zone.error {
+    border-color: var(--danger);
+    border-style: solid;
+  }
+
+  .upload-icon { font-size: 1.4rem; margin-bottom: 6px; }
+
+  .upload-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .upload-link { color: var(--accent); text-decoration: underline; }
+
+  .upload-formats {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    opacity: 0.6;
+  }
+
+  .upload-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    margin-top: 8px;
+    min-height: 18px;
+    letter-spacing: 0.05em;
+  }
+
+  .upload-zone.success .upload-status { color: var(--accent); }
+  .upload-zone.error .upload-status { color: var(--danger); }
+  .innovation-card { position: relative; }
+
+  .innovation-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .innovation-score-display {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .innovation-score-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .innovation-score-denom {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  .innovation-label {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .label-Exceptional { background: rgba(0,255,136,0.12); color: var(--accent); border: 1px solid rgba(0,255,136,0.3); }
+  .label-High { background: rgba(0,200,255,0.1); color: var(--accent2); border: 1px solid rgba(0,200,255,0.3); }
+  .label-Moderate { background: rgba(240,180,41,0.1); color: var(--yellow); border: 1px solid rgba(240,180,41,0.3); }
+  .label-Standard { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+  .innovation-dimensions { display: flex; flex-direction: column; gap: 16px; }
+
+  .innovation-dim {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .innovation-dim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .innovation-dim-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .innovation-dim-score {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .innovation-bar-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .innovation-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .bar-novelty { background: linear-gradient(90deg, var(--accent), #00cc6a); box-shadow: 0 0 8px rgba(0,255,136,0.4); }
+  .bar-impact { background: linear-gradient(90deg, var(--accent2), #0099cc); box-shadow: 0 0 8px rgba(0,200,255,0.4); }
+  .bar-synergy { background: linear-gradient(90deg, #a855f7, #7c3aed); box-shadow: 0 0 8px rgba(168,85,247,0.4); }
+
+  .innovation-evidence {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .innovation-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+  .task-overrides {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0 8px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .task-override-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .task-override-field label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .task-select {
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .task-select:focus { border-color: var(--accent2); }
+
+  .task-number {
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .task-number:focus { border-color: var(--accent2); }
+
+  /* ─── VALUE CALCULATOR ─── */
+
+  .calc-section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-top: 16px;
+  }
+
+  .calc-section-label:first-child { margin-top: 0; }
+
+  .role-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .role-btn {
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 0.72rem;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .role-btn:hover { border-color: var(--muted); color: var(--text); }
+  .role-btn.active { background: rgba(0,255,136,0.1); color: var(--accent); border-color: var(--accent); }
+
+  .calc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 520px) { .calc-row { grid-template-columns: 1fr; } }
+
+  .calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .calc-field label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .calc-field input[type="number"] {
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .calc-field input[type="number"]:focus { border-color: var(--accent); }
+
+  .calc-field input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 4px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .calc-range-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .calc-result {
+    background: var(--surface);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 3px;
+    padding: 16px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .calc-result-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .calc-result-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+
+  .calc-formula {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .calc-pro-teaser {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(0,200,255,0.05);
+    border: 1px solid rgba(0,200,255,0.15);
+    border-radius: 3px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .calc-pro-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+  }
+
+  .calc-pro-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .calc-pro-btn:hover { background: rgba(0,200,255,0.1); }
+
+  .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    font-size: 0.6rem;
+    cursor: pointer;
+    margin-left: 6px;
+    font-family: serif;
+    font-style: italic;
+    transition: all 0.2s;
+  }
+
+  .info-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Formula Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    max-width: 480px;
+    width: 90%;
+    position: relative;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .modal-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .modal-body {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .modal-body strong { color: var(--text); }
+
+  .modal-formula {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px;
+    margin: 16px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    line-height: 1.8;
+  }
+
+  .modal-close {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media print {
+    .sidebar, .btn-row, #status-bar, #export-row, .card:first-of-type, #reports, .sidebar-toggle { display: none !important; }
+    .main-content { margin-left: 0 !important; }
+    body { background: white !important; color: black !important; }
+    body::before { display: none; }
+    .card { border: 1px solid #ccc !important; background: white !important; break-inside: avoid; }
+    .stat-box, .contrib-box { border: 1px solid #ccc !important; background: #f9f9f9 !important; }
+    .action-item { border: 1px solid #ccc !important; background: #f9f9f9 !important; break-inside: avoid; }
+    h1, .card-title { color: #000 !important; text-shadow: none !important; }
+    .stat-value, .stat-label, .action-text { color: #000 !important; }
+    .stat-value.blue, .action-rationale, .action-hours, .action-value { color: #333 !important; }
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<!-- ─── AUTH SCREEN ─── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>VOSS</h1>
+      <p>Virtual Operating System Synopsis</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="auth-form">
+      <input type="email" id="login-email" placeholder="Email address" />
+      <input type="password" id="login-password" placeholder="Password" />
+      <div id="login-message" class="auth-message"></div>
+      <button class="auth-btn" onclick="handleLogin()">⚡ Sign In</button>
+      <button onclick="handleForgotPassword()" style="background:transparent;border:none;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:0.72rem;cursor:pointer;letter-spacing:0.05em;text-align:center;margin-top:4px;" type="button">Forgot password?</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signup-form" class="auth-form" style="display:none;">
+      <input type="text" id="signup-name" placeholder="Full name" />
+      <input type="email" id="signup-email" placeholder="Email address" />
+      <input type="password" id="signup-password" placeholder="Password (min 8 characters)" />
+      <label class="auth-checkbox">
+        <input type="checkbox" id="terms-checkbox" />
+        <span>I agree to the <a href="https://vossintel.com/terms.html" target="_blank">Terms of Service</a> and <a href="https://vossintel.com/privacy.html" target="_blank">Privacy Policy</a></span>
+      </label>
+      <div id="signup-message" class="auth-message"></div>
+      <button class="auth-btn" onclick="handleSignup()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── APP SCREEN ─── -->
+<div id="app-screen">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰ VOSS</button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          VOSS INTEL
+          <span>Virtual Operating System Synopsis</span>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div class="user-info">
+          <div class="user-email" id="user-email">—</div>
+          <div class="user-plan">Free Plan</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section-label">// Actions</div>
+      <button class="sidebar-new-btn" onclick="newReport()">⚡ New Report</button>
+
+      <div class="sidebar-section-label">// Report History</div>
+      <div class="report-log" id="report-log">
+        <div class="report-log-empty">[ NO REPORTS YET ]<br>Submit your first report<br>to begin tracking value</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-links">
+          <a href="https://vossintel.com/terms.html" target="_blank">Terms</a>
+          <a href="https://vossintel.com/privacy.html" target="_blank">Privacy</a>
+          <a href="mailto:service@vossintel.com">Contact</a>
+        </div>
+        <button class="signout-btn" onclick="handleSignOut()">↩ Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="main-inner">
+
+        <!-- Submit Report -->
+        <div class="card">
+          <div class="card-title">Submit Report</div>
+          <form id="reportForm">
+            <div class="form-row">
+              <input type="text" id="rep-name" placeholder="Name" required>
+              <input type="text" id="rep-department" placeholder="Department — Position">
+            </div>
+
+            <!-- Share Link Input -->
+            <div class="share-link-row">
+              <input type="url" id="share-link-input" placeholder="Paste ChatGPT or Claude share link..." class="share-link-input">
+              <button type="button" class="share-link-btn" onclick="fetchShareLink()">Fetch</button>
+            </div>
+            <div id="share-link-status" class="share-link-status"></div>
+
+            <!-- File Upload Zone -->
+            <div class="upload-zone" id="upload-zone"
+              ondragover="handleDragOver(event)"
+              ondragleave="handleDragLeave(event)"
+              ondrop="handleDrop(event)"
+              onclick="document.getElementById('file-input').click()">
+              <div class="upload-icon">📎</div>
+              <div class="upload-text">Drop file here or <span class="upload-link">browse</span></div>
+              <div class="upload-formats">PDF · TXT · MD · JSON · HTML</div>
+              <div class="upload-status" id="upload-status"></div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,.txt,.md,.json,.html"
+              style="display:none" onchange="handleFileSelect(event)">
+
+            <!-- JSON Conversation Picker (shows when multi-chat JSON detected) -->
+            <div id="json-picker" style="display:none;" class="json-picker">
+              <div class="json-picker-label">// Select conversation to analyze</div>
+              <select id="json-conversation-select" class="task-select" style="width:100%;margin-bottom:10px;">
+              </select>
+              <button type="button" class="btn btn-secondary" style="width:100%;" onclick="loadSelectedConversation()">Load Selected Conversation</button>
+            </div>
+
+            <textarea id="rep-issue" placeholder="Paste chat transcript here, upload a file, or use a share link above..." required></textarea>
+            <button type="submit" class="btn btn-primary">Submit Report</button>
+          </form>
+        </div>
+
+        <!-- Actions -->
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="generateAiReport()">⚡ VOSS Value Report</button>
+          <button class="btn btn-ghost" onclick="clearSession()">✕ Clear Session</button>
+        </div>
+
+        <!-- Status -->
+        <div id="status-bar">
+          <div class="status-dot"></div>
+          <span id="status-text">System ready — submit a report to begin</span>
+        </div>
+
+        <!-- Section 1 -->
+        <div id="section-summary" class="card" style="display:none;">
+          <div class="card-title">Section 1 — Time & Value Summary</div>
+          <div class="summary-grid">
+            <div class="stat-box"><div class="stat-label">Hours Saved</div><div class="stat-value" id="out-hours">—</div></div>
+            <div class="stat-box"><div class="stat-label">Chat Value</div><div class="stat-value blue" id="out-cost">—</div></div>
+            <div class="stat-box"><div class="stat-label">Projected Business Value</div><div class="stat-value" id="out-projected">—</div><div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);margin-top:6px;line-height:1.5;" id="out-projected-breakdown"></div></div>
+            <div class="stat-box"><div class="stat-label">Category</div><div class="stat-value blue" style="font-size:0.85rem;" id="out-category">—</div></div>
+          </div>
+          <div class="contrib-row">
+            <div class="contrib-box"><div class="stat-label">AI Contribution</div><div class="stat-value" id="out-ai">—</div></div>
+            <div class="contrib-box"><div class="stat-label">Human Contribution</div><div class="stat-value blue" id="out-human">—</div></div>
+          </div>
+          <div class="analysis-source" id="out-source"></div>
+        </div>
+
+        <!-- Section 1B: Implementation Cost Calculator (collapsible) -->
+        <div id="section-calculator" class="card" style="display:none;">
+          <div class="card-title" style="cursor:pointer;" onclick="toggleCalc()">
+            Section 1B — Implementation Cost Calculator
+            <span id="calc-arrow" style="margin-left:auto;font-size:0.7rem;transition:transform 0.3s;">▼</span>
+          </div>
+
+          <div id="calc-body">
+            <div class="calc-section-label">// Pay Rate — drag to set hourly rate</div>
+            <div class="calc-field" style="margin-bottom:8px;">
+              <label>Hourly Rate — <span id="rate-label">$65/hr (Mid-level)</span></label>
+              <input type="range" id="calc-rate-slider" min="10" max="200" step="1" value="65"
+                oninput="updateRateLabel(); recalculate()">
+              <div class="calc-range-row">
+                <span>$10 Min Wage</span>
+                <span>$65 Mid</span>
+                <span>$200 Executive</span>
+              </div>
+            </div>
+
+            <div class="calc-row">
+              <div class="calc-field">
+                <label>Custom Rate ($) — override slider</label>
+                <input type="number" id="calc-rate" value="65" min="10" max="500" oninput="syncRateFromInput(); recalculate()">
+              </div>
+              <div class="calc-field">
+                <label>Default Headcount</label>
+                <input type="number" id="calc-headcount" value="1" min="1" max="50" oninput="recalculate()">
+              </div>
+            </div>
+
+            <div class="calc-field" style="margin-bottom:16px;">
+              <label>Industry Multiplier — <span id="mult-label">General (1.0x)</span></label>
+              <input type="range" id="calc-multiplier" min="0.5" max="2.0" step="0.1" value="1.0"
+                oninput="updateMultiplierLabel(); recalculate()">
+              <div class="calc-range-row">
+                <span>0.5x Low</span>
+                <span>1.0x General</span>
+                <span>2.0x High</span>
+              </div>
+            </div>
+
+            <div class="calc-result">
+              <div>
+                <div class="calc-result-label">Estimated Implementation Cost</div>
+                <div class="calc-result-value" id="calc-output">$0</div>
+              </div>
+              <div class="calc-formula" id="calc-formula-display">
+                Σ tasks × rate × headcount × multiplier
+              </div>
+            </div>
+
+            <div class="calc-pro-teaser">
+              <div class="calc-pro-text">🔒 Pro — Save rate presets, team templates, time horizon modeling</div>
+              <button class="calc-pro-btn" onclick="alert('Pro plan coming soon!')">Upgrade to Pro</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formula Modal -->
+        <div class="modal-overlay" id="formula-modal">
+          <div class="modal">
+            <div class="modal-title">// How We Calculate</div>
+            <div class="modal-body">
+              <p>VOSS tracks three distinct financial metrics:</p>
+              <div class="modal-formula">
+                Chat Value =<br>
+                &nbsp;&nbsp;Hours Saved × $65/hr × AI Contribution %<br><br>
+                Implementation Cost =<br>
+                &nbsp;&nbsp;Σ (Hours to Complete × Role Rate × Headcount)<br>
+                &nbsp;&nbsp;× Industry Multiplier<br><br>
+                Projected Business Value =<br>
+                &nbsp;&nbsp;AI estimate of business ROI when tasks complete
+              </div>
+              <p><strong>Chat Value</strong> — what this AI session saved in time and money.</p>
+              <p style="margin-top:8px;"><strong>Implementation Cost</strong> — realistic labor cost to complete all planned tasks. Adjust role, headcount, and hours per task.</p>
+              <p style="margin-top:8px;"><strong>Projected Business Value</strong> — estimated economic value the business gains when these tasks are completed. Based on impact type and industry multipliers.</p>
+              <p style="margin-top:8px;"><strong>Industry Multiplier</strong> — scales implementation cost estimate based on your industry's labor market.</p>
+            </div>
+            <button class="modal-close" onclick="closeFormulaModal()">✕ Close</button>
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div id="section-recap" class="card" style="display:none;">
+          <div class="card-title">Section 2 — Chat Summary</div>
+          <p class="chat-recap" id="out-recap"></p>
+        </div>
+
+        <!-- Section 2C: Hybrid Innovation Score -->
+        <div id="section-innovation" class="card innovation-card" style="display:none;">
+          <div class="card-title">Section 2C — Hybrid Innovation Score</div>
+          <div class="innovation-header">
+            <div class="innovation-score-display">
+              <div class="innovation-score-number" id="innov-score">—</div>
+              <div class="innovation-score-denom">/100</div>
+            </div>
+            <div class="innovation-label" id="innov-label">—</div>
+          </div>
+          <div class="innovation-dimensions">
+            <div class="innovation-dim">
+              <div class="innovation-dim-header">
+                <span class="innovation-dim-label">⚡ Novelty</span>
+                <span class="innovation-dim-score" id="innov-novelty-score">—</span>
+              </div>
+              <div class="innovation-bar-track">
+                <div class="innovation-bar-fill bar-novelty" id="innov-novelty-bar" style="width:0%"></div>
+              </div>
+              <div class="innovation-evidence" id="innov-novelty-evidence">—</div>
+            </div>
+            <div class="innovation-divider"></div>
+            <div class="innovation-dim">
+              <div class="innovation-dim-header">
+                <span class="innovation-dim-label">🎯 Impact Potential</span>
+                <span class="innovation-dim-score" id="innov-impact-score">—</span>
+              </div>
+              <div class="innovation-bar-track">
+                <div class="innovation-bar-fill bar-impact" id="innov-impact-bar" style="width:0%"></div>
+              </div>
+              <div class="innovation-evidence" id="innov-impact-evidence">—</div>
+            </div>
+            <div class="innovation-divider"></div>
+            <div class="innovation-dim">
+              <div class="innovation-dim-header">
+                <span class="innovation-dim-label">🔗 Hybrid Synergy</span>
+                <span class="innovation-dim-score" id="innov-synergy-score">—</span>
+              </div>
+              <div class="innovation-bar-track">
+                <div class="innovation-bar-fill bar-synergy" id="innov-synergy-bar" style="width:0%"></div>
+              </div>
+              <div class="innovation-evidence" id="innov-synergy-evidence">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div id="section-actions" class="card" style="display:none;">
+          <div class="card-title">Section 3 — Action Priority List</div>
+          <div class="action-table-header">
+            <div class="action-col-label"></div>
+            <div class="action-col-label">Task / Action</div>
+            <div class="action-col-label" style="text-align:right;">Hrs Saved / Projected Value</div>
+          </div>
+          <div id="out-actions"></div>
+        </div>
+
+        <!-- Export -->
+        <div id="export-row" class="btn-row" style="display:none;">
+          <button class="btn btn-secondary" onclick="exportPDF()">📄 Export PDF</button>
+          <button class="btn btn-secondary" onclick="shareReport()">📧 Share via Email</button>
+        </div>
+
+        <!-- Session Reports -->
+        <div class="card">
+          <div class="card-title">Session Reports</div>
+          <div id="reports"><div class="empty-state">[ NO REPORTS THIS SESSION ]</div></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:#3d4550;letter-spacing:0.05em;line-height:1.6;background:var(--bg);position:relative;z-index:1;">
+  VOSS reports are generated by AI and may contain inaccuracies. Please review all outputs before making business decisions.
+</footer>
+
+<script>
+  // ─── SUPABASE INIT ───
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://irgbgizvcxsdxosfjswk.supabase.co',
+    'sb_publishable_nnyhOAPaDpWZk_huoANqpA_Mpa3MPSR'
+  );
+
+  const WORKER_URL = "https://voss-reporting.eliasvoss77.workers.dev";
+  const API_KEY = "voss-dk7x-2f9m-q372";
+
+  let currentUser = null;
+  let sessionReports = [];
+  let actionNotes = {};
+  let currentReportData = null;
+
+  // ─── VALUE CALCULATOR ───
+  let calcRate = 65;
+  let calcAiPct = 1.0;
+  let rawActionItems = [];
+  let calcOpen = true;
+
+  const roleRates = { Junior: 35, Mid: 65, Senior: 95, Executive: 150 };
+
+  function toggleCalc() {
+    calcOpen = !calcOpen;
+    document.getElementById('calc-body').style.display = calcOpen ? 'block' : 'none';
+    document.getElementById('calc-arrow').style.transform = calcOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+  }
+
+  function updateRateLabel() {
+    const val = parseInt(document.getElementById('calc-rate-slider').value);
+    let label = `$${val}/hr`;
+    if (val <= 15) label = `$${val}/hr (Minimum Wage)`;
+    else if (val <= 20) label = `$${val}/hr (Entry Level)`;
+    else if (val <= 30) label = `$${val}/hr (Service Worker)`;
+    else if (val <= 50) label = `$${val}/hr (Skilled Trade)`;
+    else if (val <= 75) label = `$${val}/hr (Mid-Level Professional)`;
+    else if (val <= 100) label = `$${val}/hr (Senior Professional)`;
+    else if (val <= 150) label = `$${val}/hr (Manager / Specialist)`;
+    else label = `$${val}/hr (Executive / Director)`;
+    document.getElementById('rate-label').textContent = label;
+    document.getElementById('calc-rate').value = val;
+    calcRate = val; // sync global variable
+    recalculate(); // recalculate immediately
+  }
+
+  function syncRateFromInput() {
+    const val = parseInt(document.getElementById('calc-rate').value) || 65;
+    document.getElementById('calc-rate-slider').value = Math.min(val, 200);
+    calcRate = val;
+    updateRateLabel();
+  }
+
+  function updateMultiplierLabel() {
+    const val = parseFloat(document.getElementById('calc-multiplier').value);
+    let label = 'General (1.0x)';
+    if (val <= 0.6) label = 'Non-Profit / Low Margin (' + val + 'x)';
+    else if (val <= 0.8) label = 'Retail / Service (' + val + 'x)';
+    else if (val <= 1.0) label = 'General / Mixed (' + val + 'x)';
+    else if (val <= 1.2) label = 'Tech / SaaS (' + val + 'x)';
+    else if (val <= 1.5) label = 'Finance / Consulting (' + val + 'x)';
+    else label = 'High Value / Enterprise (' + val + 'x)';
+    document.getElementById('mult-label').textContent = label;
+  }
+
+  function getTaskRate(index) {
+    const el = document.getElementById('task-role-' + index);
+    if (el) return parseFloat(el.value) || calcRate;
+    return calcRate;
+  }
+
+  function getTaskHeadcount(index) {
+    const el = document.getElementById('task-headcount-' + index);
+    if (el) return parseFloat(el.value) || 1;
+    return parseFloat(document.getElementById('calc-headcount')?.value) || 1;
+  }
+
+  function getTaskHours(index) {
+    const el = document.getElementById('task-hours-' + index);
+    if (el) return parseFloat(el.value) || 0;
+    return rawActionItems[index]?.hoursToComplete || 0;
+  }
+
+  function recalculate() {
+    const multiplier = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
+    const rate = calcRate || parseFloat(document.getElementById('calc-rate').value) || 65;
+    const headcount = parseFloat(document.getElementById('calc-headcount')?.value) || 1;
+    let total = 0;
+
+    if (rawActionItems.length > 0) {
+      rawActionItems.forEach((a, i) => {
+        const r = getTaskRate(i);
+        const h = getTaskHeadcount(i);
+        const hrs = getTaskHours(i);
+        total += hrs * r * h;
+      });
+      total = total * multiplier;
     }
 
-    const url = new URL(request.url);
+    total = Math.round(total / 50) * 50;
+    document.getElementById('calc-output').textContent = '$' + total.toLocaleString();
+    document.getElementById('calc-formula-display').textContent =
+      `Σ tasks × $${rate}/hr × ${headcount} person(s) × ${multiplier}x`;
+  }
 
-    // Share link fetcher endpoint
-    if (request.method === 'POST' && url.pathname === '/fetch-share') {
-      const apiKey = request.headers.get("x-api-key");
-      if (apiKey !== "voss-dk7x-2f9m-q372") {
-        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-      }
-      try {
-        const body = await request.json();
-        const shareUrl = body.url || '';
+  function applyMultiplierToSection3() {
+    if (rawActionItems.length === 0) return;
+    rawActionItems.forEach((a, i) => updateTaskCost(i));
+    recalculate();
+  }
 
-        // Try multiple fetch strategies
-        let pageText = '';
-        let fetchError = '';
+  function applyGlobalRateToSection3() {
+    // Sync global rate to all per-task sliders
+    if (rawActionItems.length === 0) return;
+    rawActionItems.forEach((a, i) => {
+      const taskSlider = document.getElementById('task-rate-slider-' + i);
+      const taskLabel = document.getElementById('task-rate-label-' + i);
+      if (taskSlider) taskSlider.value = calcRate;
+      if (taskLabel) taskLabel.textContent = `$${calcRate}/hr`;
+      updateTaskCost(i);
+    });
+    recalculate();
+  }
 
-        // Strategy 1: Direct fetch with browser-like headers
-        try {
-          const direct = await fetch(shareUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'Accept-Language': 'en-US,en;q=0.5',
-            }
-          });
-          if (direct.ok) {
-            pageText = await direct.text();
-          } else {
-            fetchError = 'Direct fetch failed: ' + direct.status;
-          }
-        } catch(e) {
-          fetchError = 'Direct fetch error: ' + e.message;
-        }
+  function showFormulaModal() {
+    document.getElementById('formula-modal').classList.add('open');
+  }
 
-        // Strategy 2: Try Jina if direct failed
-        if (!pageText || pageText.length < 100) {
-          try {
-            const jina = await fetch('https://r.jina.ai/' + shareUrl, {
-              headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text' }
-            });
-            if (jina.ok) {
-              pageText = await jina.text();
-            } else {
-              fetchError += ' | Jina failed: ' + jina.status;
-            }
-          } catch(e) {
-            fetchError += ' | Jina error: ' + e.message;
-          }
-        }
+  function closeFormulaModal() {
+    document.getElementById('formula-modal').classList.remove('open');
+  }
 
-        if (!pageText || pageText.length < 100) {
-          return new Response(JSON.stringify({
-            error: 'Could not fetch page. ChatGPT share links require JavaScript rendering. Try: copy the conversation text and paste it directly, or export and upload the JSON file. Debug: ' + fetchError
-          }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('formula-modal');
+    if (modal) modal.addEventListener('click', function(e) {
+      if (e.target === this) closeFormulaModal();
+    });
+    const slider = document.getElementById('calc-multiplier');
+    if (slider) slider.addEventListener('input', () => { applyMultiplierToSection3(); });
+    const rateSlider = document.getElementById('calc-rate-slider');
+    if (rateSlider) rateSlider.addEventListener('input', () => { updateRateLabel(); applyGlobalRateToSection3(); });
+  });
 
-        // Use Claude to extract conversation
-        const extractResponse = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": env.ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01"
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 8000,
-            messages: [{
-              role: "user",
-              content: `Extract the conversation from this page content. Format as:
-User: [message]
-Assistant: [message]
-Return ONLY the conversation, no commentary.
 
-Content:
-${pageText.substring(0, 50000)}`
-            }]
-          })
-        });
-
-        const extractData = await extractResponse.json();
-        const text = extractData.content?.[0]?.text || '';
-
-        if (!text || text.length < 20) {
-          return new Response(JSON.stringify({ error: 'Could not parse conversation from this page' }), {
-            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
-          });
-        }
-
-        return new Response(JSON.stringify({ text }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-
-      } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-      }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      showApp();
+    } else {
+      currentUser = null;
+      showAuth();
     }
+  });
 
-    // PDF text extraction endpoint
-    if (request.method === 'POST' && url.pathname === '/extract-pdf') {
-      const apiKey = request.headers.get("x-api-key");
-      if (apiKey !== "voss-dk7x-2f9m-q372") {
-        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-      }
-      try {
-        const body = await request.json();
-        const pdfBase64 = body.pdf || '';
-        const extractResponse = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": env.ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01"
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 8000,
-            messages: [{
-              role: "user",
-              content: [
-                {
-                  type: "document",
-                  source: { type: "base64", media_type: "application/pdf", data: pdfBase64 }
-                },
-                {
-                  type: "text",
-                  text: "Extract all text content from this PDF document. Return only the raw text content, preserving the conversation structure if it is a chat transcript. Do not add any commentary or formatting."
-                }
-              ]
-            }]
-          })
-        });
-        const extractData = await extractResponse.json();
-        const text = extractData.content?.[0]?.text || '';
-        return new Response(JSON.stringify({ text }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-      } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-      }
-    }
+  function showAuth() {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+  }
 
-    if (request.method !== "POST") {
-      return new Response("Method not allowed", { status: 405, headers: corsHeaders });
-    }
+  function showApp() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    setupUserUI();
+    loadReportHistory();
+  }
 
-    const apiKey = request.headers.get("x-api-key");
-    if (apiKey !== "voss-dk7x-2f9m-q372") {
-      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-    }
+  function setupUserUI() {
+    const email = currentUser.email;
+    const name = currentUser.user_metadata?.full_name || email;
+    const initials = name.charAt(0).toUpperCase();
+    document.getElementById('user-email').textContent = email;
+    document.getElementById('user-avatar').textContent = initials;
+  }
+
+  // ─── SHARE LINK FETCHER ───
+  let parsedConversations = [];
+
+  async function fetchShareLink() {
+    const input = document.getElementById('share-link-input');
+    const status = document.getElementById('share-link-status');
+    const btn = document.querySelector('.share-link-btn');
+    const url = input.value.trim();
+
+    if (!url) { setShareStatus('Enter a share link first', 'error'); return; }
+    if (!url.startsWith('http')) { setShareStatus('Please enter a valid URL', 'error'); return; }
+
+    setShareStatus('⏳ Fetching conversation...', 'loading');
+    btn.disabled = true;
 
     try {
-      const body = await request.json();
-      const chatText = body.chat || "";
-      const name = body.name || "Unknown";
-      const department = body.department || "Unknown";
-
-      if (chatText.trim().length === 0) {
-        return new Response("No chat text provided", { status: 400, headers: corsHeaders });
-      }
-
-      const prompt = `
-You are an AI productivity analyst for VOSS Reporting. Analyze the conversation and return ONLY a valid JSON object. No markdown, no backticks, no extra text.
-
-{
-  "summary": {
-    "hoursSaved": 0,
-    "chatValue": "$0",
-    "projectedBusinessValue": "$0",
-    "projectedValueBreakdown": "Built from X tasks: $Xk labor + $Xk uplift",
-    "aiContribution": "XX%",
-    "humanContribution": "XX%",
-    "category": "Category Name"
-  },
-  "chatRecap": "3-5 sentence plain business summary. No bullets.",
-  "innovation": {
-    "score": 0,
-    "label": "Standard",
-    "novelty": { "score": 0, "evidence": "One sentence explaining what makes this novel or unique." },
-    "impact": { "score": 0, "evidence": "One sentence on breadth, scalability, or downstream impact." },
-    "hybridSynergy": { "score": 0, "evidence": "One sentence on how human+AI collaboration elevated the output." }
-  },
-  "actionItems": [
-    {
-      "action": "Task description",
-      "hoursSaved": 0,
-      "hoursToComplete": 0,
-      "taskValue": "$0",
-      "status": "Complete",
-      "rationale": "Brief reason",
-      "suggestedRole": "Mid",
-      "notes": ""
-    }
-  ]
-}
-
-CALCULATIONS:
-
-chatValue = hoursSaved × $65 × (AI% as decimal). Round $50. Format "$1,250".
-
-Per task — taskValue has two parts:
-1. Labor: hoursToComplete × $65 × (AI% as decimal)
-2. Strategic uplift multiplier by work type:
-   - Policy/Legal/Gov: 6x-10x labor
-   - Tech/Software: 10x-15x labor
-   - Marketing/Content: 3x-5x labor
-   - Sales/Revenue: 8x-12x labor
-   - Research/Analysis: 3x-6x labor
-   - Operations/Process: 4x-7x labor
-   - Strategy/Planning: 6x-10x labor
-taskValue = labor + (labor × multiplier). Round $100. Format "$12,500".
-
-projectedBusinessValue = sum of all taskValue. Round $500. Format "$45,000".
-projectedValueBreakdown = "Built from X tasks: $Xk labor + $Xk uplift" (keep short).
-
-INNOVATION SCORING — score each dimension 0-100:
-
-novelty (40% weight):
-- How unique or original are the ideas vs standard approaches in this domain?
-- 80-100: Genuinely novel concept, rare combination, or first-of-kind approach
-- 60-79: Meaningful differentiation from common methods
-- 40-59: Some fresh angles on established approaches
-- 0-39: Standard execution of common approaches
-
-impact (30% weight):
-- Breadth, scalability, and downstream business/social/economic potential
-- 80-100: Large-scale, systemic, or market-defining potential
-- 60-79: Significant organizational or sector-level impact
-- 40-59: Meaningful team or departmental impact
-- 0-39: Limited or local impact
-
-hybridSynergy (30% weight):
-- How much did human+AI collaboration produce output beyond what either could alone?
-- 80-100: AI enabled breakthrough thinking, novel frameworks, or unique synthesis
-- 60-79: Clear amplification of human expertise through AI
-- 40-59: Productive collaboration with some enhancement
-- 0-39: Mostly mechanical assistance
-
-overall score = (novelty × 0.4) + (impact × 0.3) + (hybridSynergy × 0.3). Round to integer.
-
-label based on score:
-- 85-100: "Exceptional"
-- 70-84: "High"
-- 50-69: "Moderate"
-- 0-49: "Standard"
-
-evidence = one specific, concrete sentence. Reference actual content from the conversation.
-
-OTHER RULES:
-hoursToComplete = realistic human hours to finish task.
-suggestedRole = "Junior" | "Mid" | "Senior" | "Executive"
-status = "Complete" | "In Progress" | "Planned"
-notes = ""
-Include 5-8 action items. Rank by taskValue descending.
-aiContribution + humanContribution = 100%.
-CONSISTENCY: Same chat analyzed twice should be within 10%.
-
-Conversation:
-${chatText}
-`;
-
-      const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": env.ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-5",
-          max_tokens: 8000,
-          messages: [{ role: "user", content: prompt }]
-        })
+      const response = await fetch(WORKER_URL + '/fetch-share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        body: JSON.stringify({ url })
       });
 
-      const aiData = await anthropicResponse.json();
+      const data = await response.json();
 
-      if (!anthropicResponse.ok || !aiData.content) {
-        return new Response(JSON.stringify(aiData), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'Failed to fetch conversation');
       }
 
-      let content = aiData.content[0].text;
-      content = content.replace(/```json\s*|\s*```/g, "").trim();
-
-      let parsedJson;
-      try {
-        parsedJson = JSON.parse(content);
-      } catch (e) {
-        return new Response("AI failed to return valid JSON: " + content, { status: 500, headers: corsHeaders });
-      }
-
-      const summary = parsedJson.summary || {};
-      const actionItems = parsedJson.actionItems || [];
-
-      await env.DB.prepare(`
-        INSERT INTO reports (name, department, chat_text, tasks, hours_saved, economic_value, projected_value, ai_contribution, human_contribution, category)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        name,
-        department,
-        chatText,
-        JSON.stringify(actionItems.map(t => t.action)),
-        summary.hoursSaved || 0,
-        0,
-        summary.projectedBusinessValue || "$0",
-        summary.aiContribution || "0%",
-        summary.humanContribution || "0%",
-        summary.category || "Uncategorized"
-      ).run();
-
-      return new Response(JSON.stringify(parsedJson), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      document.getElementById('rep-issue').value = data.text;
+      setShareStatus('✓ Conversation loaded successfully!', 'success');
+      input.value = '';
 
     } catch (err) {
-      return new Response(`Server Error: ${err.message}`, { status: 500, headers: corsHeaders });
+      setShareStatus('✕ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
     }
   }
-};
+
+  function setShareStatus(msg, type) {
+    const el = document.getElementById('share-link-status');
+    el.textContent = msg;
+    el.className = 'share-link-status ' + type;
+  }
+
+  // Allow Enter key on share link input
+  document.addEventListener('DOMContentLoaded', () => {
+    const shareInput = document.getElementById('share-link-input');
+    if (shareInput) {
+      shareInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); fetchShareLink(); }
+      });
+    }
+  });
+
+  // ─── FILE UPLOAD ───
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.add('dragover');
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('upload-zone').classList.remove('dragover');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  }
+
+  async function processFile(file) {
+    const zone = document.getElementById('upload-zone');
+    const status = document.getElementById('upload-status');
+    zone.className = 'upload-zone';
+    status.textContent = '⏳ Processing ' + file.name + '...';
+
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      let text = '';
+
+      if (ext === 'pdf') {
+        text = await extractPDF(file);
+      } else if (ext === 'json') {
+        text = await extractJSON(file);
+      } else if (['txt', 'md'].includes(ext)) {
+        text = await file.text();
+      } else if (ext === 'html') {
+        const raw = await file.text();
+        const div = document.createElement('div');
+        div.innerHTML = raw;
+        text = div.innerText;
+      } else {
+        throw new Error('Unsupported file type: .' + ext);
+      }
+
+      if (!text || text.trim().length < 20) throw new Error('File appears empty or unreadable');
+
+      document.getElementById('rep-issue').value = text.trim();
+      zone.classList.add('success');
+      status.textContent = '✓ ' + file.name + ' loaded (' + text.length.toLocaleString() + ' chars)';
+
+    } catch (err) {
+      zone.classList.add('error');
+      status.textContent = '✕ ' + err.message;
+    }
+  }
+
+  async function extractPDF(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const base64 = e.target.result.split(',')[1];
+          const response = await fetch(WORKER_URL + '/extract-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+            body: JSON.stringify({ pdf: base64 })
+          });
+          if (!response.ok) throw new Error('PDF extraction failed — try copy/paste instead');
+          const data = await response.json();
+          resolve(data.text || '');
+        } catch (err) { reject(err); }
+      };
+      reader.onerror = () => reject(new Error('Could not read PDF'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function extractJSON(file) {
+    const text = await file.text();
+    const json = JSON.parse(text);
+
+    // ChatGPT export: array of conversations
+    if (Array.isArray(json) && json.length > 0 && json[0].mapping) {
+      parsedConversations = json;
+
+      if (json.length === 1) {
+        // Single conversation — just load it
+        return extractSingleChatGPTConvo(json[0]);
+      }
+
+      // Multiple conversations — show picker
+      const select = document.getElementById('json-conversation-select');
+      select.innerHTML = '';
+      json.forEach((convo, i) => {
+        const title = convo.title || 'Conversation ' + (i + 1);
+        const date = convo.create_time
+          ? new Date(convo.create_time * 1000).toLocaleDateString()
+          : '';
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = title + (date ? ' — ' + date : '');
+        select.appendChild(opt);
+      });
+      document.getElementById('json-picker').style.display = 'block';
+      return ''; // textarea stays empty until user picks one
+    }
+
+    // Claude / generic messages array
+    if (json.messages && Array.isArray(json.messages)) {
+      return json.messages.map(m => {
+        const role = m.role === 'user' ? 'User' : 'Assistant';
+        const content = Array.isArray(m.content)
+          ? m.content.filter(c => c.type === 'text').map(c => c.text).join(' ')
+          : (m.content || '');
+        return role + ': ' + content;
+      }).join('\n\n');
+    }
+
+    return JSON.stringify(json, null, 2);
+  }
+
+  function extractSingleChatGPTConvo(convo) {
+    if (!convo.mapping) return '';
+    const parts = [];
+    // Sort nodes by create_time to preserve order
+    const nodes = Object.values(convo.mapping)
+      .filter(n => n.message?.content?.parts?.length > 0)
+      .sort((a, b) => (a.message.create_time || 0) - (b.message.create_time || 0));
+    nodes.forEach(node => {
+      const msg = node.message;
+      const role = msg.author?.role === 'user' ? 'User' : 'Assistant';
+      const content = msg.content.parts.join(' ').trim();
+      if (content && content !== 'undefined') parts.push(role + ': ' + content);
+    });
+    return parts.join('\n\n');
+  }
+
+  function loadSelectedConversation() {
+    const select = document.getElementById('json-conversation-select');
+    const index = parseInt(select.value);
+    const convo = parsedConversations[index];
+    if (!convo) return;
+    const text = extractSingleChatGPTConvo(convo);
+    document.getElementById('rep-issue').value = text;
+    document.getElementById('json-picker').style.display = 'none';
+    const zone = document.getElementById('upload-zone');
+    const status = document.getElementById('upload-status');
+    zone.classList.add('success');
+    status.textContent = '✓ Loaded: ' + (convo.title || 'Conversation') + ' (' + text.length.toLocaleString() + ' chars)';
+  }
+
+  // ─── AUTH FUNCTIONS ───
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('login-form').style.display = tab === 'login' ? 'flex' : 'none';
+    document.getElementById('signup-form').style.display = tab === 'signup' ? 'flex' : 'none';
+  }
+
+  function showAuthMessage(formId, msg, type) {
+    const el = document.getElementById(formId + '-message');
+    el.textContent = msg;
+    el.className = 'auth-message ' + type;
+    el.style.display = 'block';
+  }
+
+  async function handleForgotPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      showAuthMessage('login', 'Enter your email address above first', 'error');
+      return;
+    }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://app.vossintel.com'
+    });
+    if (error) {
+      showAuthMessage('login', error.message, 'error');
+    } else {
+      showAuthMessage('login', '✓ Password reset email sent! Check your inbox.', 'success');
+    }
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) { showAuthMessage('login', 'Please enter email and password', 'error'); return; }
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) showAuthMessage('login', error.message, 'error');
+  }
+
+  async function handleSignup() {
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const terms = document.getElementById('terms-checkbox').checked;
+
+    if (!name || !email || !password) { showAuthMessage('signup', 'Please fill in all fields', 'error'); return; }
+    if (password.length < 8) { showAuthMessage('signup', 'Password must be at least 8 characters', 'error'); return; }
+    if (!terms) { showAuthMessage('signup', 'Please accept the Terms of Service and Privacy Policy', 'error'); return; }
+
+    const { error } = await sb.auth.signUp({
+      email, password,
+      options: { data: { full_name: name } }
+    });
+
+    if (error) {
+      showAuthMessage('signup', error.message, 'error');
+    } else {
+      showAuthMessage('signup', '✓ Check your email to confirm your account!', 'success');
+    }
+  }
+
+  async function handleSignOut() {
+    await sb.auth.signOut();
+    sessionReports = [];
+    actionNotes = {};
+    currentReportData = null;
+  }
+
+  // ─── SIDEBAR ───
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
+  }
+
+  function newReport() {
+    document.getElementById('reportForm').reset();
+    document.getElementById('section-summary').style.display = 'none';
+    document.getElementById('section-recap').style.display = 'none';
+    document.getElementById('section-actions').style.display = 'none';
+    document.getElementById('export-row').style.display = 'none';
+    setStatus('System ready — submit a report to begin', '');
+    if (window.innerWidth <= 768) toggleSidebar();
+    window.scrollTo(0, 0);
+  }
+
+  // ─── REPORT HISTORY ───
+  async function deleteReport(id, event) {
+    event.stopPropagation();
+    if (!confirm('Delete this report?')) return;
+    const { error } = await sb.from('reports').delete().eq('id', id).eq('user_id', currentUser.id);
+    if (!error) loadReportHistory();
+  }
+
+  async function loadReportHistory() {
+    if (!currentUser) return;
+    const { data, error } = await sb
+      .from('reports')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) { console.error('Error loading reports:', error); return; }
+
+    const log = document.getElementById('report-log');
+    if (!data || data.length === 0) {
+      log.innerHTML = '<div class="report-log-empty">[ NO REPORTS YET ]<br>Submit your first report<br>to begin tracking value</div>';
+      return;
+    }
+
+    log.innerHTML = '';
+    data.forEach(r => {
+      const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const item = document.createElement('div');
+      item.className = 'report-log-item';
+      item.innerHTML = `
+        <div class="report-log-category">${r.category || 'Uncategorized'}</div>
+        <div class="report-log-meta">
+          <span class="report-log-value">${r.projected_value || '—'}</span>
+          <span class="report-log-date">${date}</span>
+        </div>
+        <button class="report-log-delete" onclick="deleteReport('${r.id}', event)" title="Delete report">✕</button>`;
+      item.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('report-log-delete')) {
+          loadHistoricalReport(r, item);
+        }
+      });
+      log.appendChild(item);
+    });
+  }
+
+  function loadHistoricalReport(r, el) {
+    document.querySelectorAll('.report-log-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+
+    document.getElementById('out-hours').textContent = r.hours_saved ?? '—';
+    document.getElementById('out-cost').textContent = r.chat_value || '—';
+    document.getElementById('out-projected').textContent = r.projected_value ?? '—';
+    document.getElementById('out-projected-breakdown').textContent = 'From saved report';
+    document.getElementById('out-category').textContent = r.category ?? '—';
+    document.getElementById('out-ai').textContent = r.ai_contribution ?? '—';
+    document.getElementById('out-human').textContent = r.human_contribution ?? '—';
+    document.getElementById('out-source').textContent = `Source: ${r.name} — ${r.department}`;
+    document.getElementById('section-summary').style.display = 'block';
+    document.getElementById('section-calculator').style.display = 'block';
+
+    document.getElementById('out-recap').textContent = r.chat_recap || '—';
+    document.getElementById('section-recap').style.display = 'block';
+
+    const actionsEl = document.getElementById('out-actions');
+    actionsEl.innerHTML = '';
+    const items = r.action_items || [];
+    rawActionItems = items;
+    items.forEach((a, i) => {
+      const statusClass = (a.status || 'Planned').replace(' ', '-');
+      actionsEl.innerHTML += buildActionItem(a, i, statusClass, '');
+    });
+    document.getElementById('section-actions').style.display = 'block';
+    document.getElementById('export-row').style.display = 'flex';
+
+    if (window.innerWidth <= 768) toggleSidebar();
+    window.scrollTo(0, 0);
+    setStatus('Report loaded from history', 'success');
+  }
+
+  // ─── FORM & REPORT ───
+  document.getElementById('reportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const report = {
+      name: document.getElementById('rep-name').value,
+      department: document.getElementById('rep-department').value,
+      text: document.getElementById('rep-issue').value
+    };
+    sessionReports.push(report);
+    displaySessionReports();
+    document.getElementById('reportForm').reset();
+    setStatus(`Report from ${report.name} submitted successfully`, 'success');
+  });
+
+  function displaySessionReports() {
+    const container = document.getElementById('reports');
+    if (sessionReports.length === 0) {
+      container.innerHTML = '<div class="empty-state">[ NO REPORTS THIS SESSION ]</div>';
+      return;
+    }
+    container.innerHTML = '';
+    sessionReports.forEach(r => {
+      container.innerHTML += `
+        <div class="report-item">
+          <div class="report-meta">
+            <span class="report-name">${r.name}</span>
+            <span class="report-dept">${r.department}</span>
+          </div>
+          <div class="report-preview">${r.text.substring(0, 120)}...</div>
+        </div>`;
+    });
+  }
+
+  function setStatus(msg, type = '') {
+    const bar = document.getElementById('status-bar');
+    bar.className = type;
+    document.getElementById('status-text').textContent = msg;
+  }
+
+  async function generateAiReport() {
+    if (sessionReports.length === 0) { setStatus('No reports to analyze — submit a report first', 'error'); return; }
+
+    setStatus('Analyzing with VOSS AI...', 'loading');
+    document.getElementById('section-summary').style.display = 'none';
+    document.getElementById('section-recap').style.display = 'none';
+    document.getElementById('section-actions').style.display = 'none';
+    document.getElementById('export-row').style.display = 'none';
+
+    try {
+      const latestReport = sessionReports[sessionReports.length - 1];
+
+      const response = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        body: JSON.stringify({ chat: latestReport.text, name: latestReport.name, department: latestReport.department })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error('Worker ' + response.status + ': ' + errText.substring(0, 200));
+      }
+
+      const data = await response.json();
+      currentReportData = { ...data, latestReport };
+
+      const summary = data.summary || {};
+      const chatRecap = data.chatRecap || '';
+      const actionItems = data.actionItems || [];
+
+      // Section 1
+      document.getElementById('out-hours').textContent = summary.hoursSaved ?? '—';
+      document.getElementById('out-cost').textContent = summary.chatValue ?? '—';
+      document.getElementById('out-projected').textContent = summary.projectedBusinessValue ?? '—';
+      document.getElementById('out-projected-breakdown').textContent = summary.projectedValueBreakdown ?? '';
+      document.getElementById('out-category').textContent = summary.category ?? '—';
+      document.getElementById('out-ai').textContent = summary.aiContribution ?? '—';
+      document.getElementById('out-human').textContent = summary.humanContribution ?? '—';
+      document.getElementById('out-source').textContent = `Source: ${latestReport.name} — ${latestReport.department}`;
+      document.getElementById('section-summary').style.display = 'block';
+      document.getElementById('section-calculator').style.display = 'block';
+
+      // Section 2
+      document.getElementById('out-recap').textContent = chatRecap;
+      document.getElementById('section-recap').style.display = 'block';
+
+      // Section 2C — Innovation Score
+      const innov = data.innovation;
+      if (innov) {
+        const score = innov.score || 0;
+        const label = innov.label || 'Standard';
+        document.getElementById('innov-score').textContent = score;
+        document.getElementById('innov-label').textContent = label;
+        document.getElementById('innov-label').className = 'innovation-label label-' + label;
+
+        // Color the score number based on label
+        const scoreEl = document.getElementById('innov-score');
+        if (label === 'Exceptional') scoreEl.style.color = 'var(--accent)';
+        else if (label === 'High') scoreEl.style.color = 'var(--accent2)';
+        else if (label === 'Moderate') scoreEl.style.color = 'var(--yellow)';
+        else scoreEl.style.color = 'var(--muted)';
+
+        // Novelty
+        const nov = innov.novelty || {};
+        document.getElementById('innov-novelty-score').textContent = (nov.score || 0) + '/100';
+        document.getElementById('innov-novelty-evidence').textContent = nov.evidence || '—';
+        setTimeout(() => {
+          document.getElementById('innov-novelty-bar').style.width = (nov.score || 0) + '%';
+        }, 100);
+
+        // Impact
+        const imp = innov.impact || {};
+        document.getElementById('innov-impact-score').textContent = (imp.score || 0) + '/100';
+        document.getElementById('innov-impact-evidence').textContent = imp.evidence || '—';
+        setTimeout(() => {
+          document.getElementById('innov-impact-bar').style.width = (imp.score || 0) + '%';
+        }, 200);
+
+        // Hybrid Synergy
+        const syn = innov.hybridSynergy || {};
+        document.getElementById('innov-synergy-score').textContent = (syn.score || 0) + '/100';
+        document.getElementById('innov-synergy-evidence').textContent = syn.evidence || '—';
+        setTimeout(() => {
+          document.getElementById('innov-synergy-bar').style.width = (syn.score || 0) + '%';
+        }, 300);
+
+        document.getElementById('section-innovation').style.display = 'block';
+      }
+
+      // Wire calculator with report data
+      const aiPct = parseFloat((summary.aiContribution || '85%').replace('%','')) / 100;
+      calcAiPct = isNaN(aiPct) ? 0.85 : aiPct;
+
+      // Section 3 — store raw items FIRST then recalculate
+      rawActionItems = actionItems;
+      const actionsEl = document.getElementById('out-actions');
+      actionsEl.innerHTML = '';
+      actionItems.forEach((a, i) => {
+        const statusClass = (a.status || 'Planned').replace(' ', '-');
+        const savedNote = actionNotes['action-note-' + i] || '';
+        actionsEl.innerHTML += buildActionItem(a, i, statusClass, savedNote);
+      });
+      document.getElementById('section-actions').style.display = 'block';
+      document.getElementById('export-row').style.display = 'flex';
+
+      // Now recalculate with all action items loaded
+      recalculate();
+
+      // Save to Supabase
+      if (currentUser) {
+        const { error: saveError } = await sb.from('reports').insert({
+          user_id: currentUser.id,
+          name: latestReport.name,
+          department: latestReport.department,
+          category: summary.category || 'Uncategorized',
+          hours_saved: summary.hoursSaved || 0,
+          projected_value: summary.projectedBusinessValue || '$0',
+          ai_contribution: summary.aiContribution || '0%',
+          human_contribution: summary.humanContribution || '0%',
+          chat_recap: chatRecap,
+          action_items: actionItems,
+          chat_value: summary.chatValue || '$0'
+        });
+        if (saveError) {
+          console.error('Save error:', saveError);
+          setStatus('Analysis complete — note: save failed (' + saveError.message + ')', 'error');
+        } else {
+          loadReportHistory();
+          setStatus('Analysis complete — saved to your profile ✓', 'success');
+        }
+      } else {
+        setStatus('Analysis complete', 'success');
+      }
+
+    } catch (err) {
+      console.error(err);
+      setStatus('Error: ' + err.message, 'error');
+    }
+  }
+
+  function buildActionItem(a, i, statusClass, savedNote) {
+    const defaultRate = parseFloat(document.getElementById('calc-rate')?.value) || 65;
+    const defaultHeadcount = parseFloat(document.getElementById('calc-headcount')?.value) || 1;
+    const implCost = Math.round((a.hoursToComplete || 0) * defaultRate * defaultHeadcount / 50) * 50;
+
+    return `
+      <div class="action-item status-${statusClass}" id="action-${i}">
+        <div class="action-main">
+          <div class="action-main-top">
+            <div class="action-light light-${statusClass}" id="light-${i}"></div>
+            <div>
+              <div class="action-text">${a.action}</div>
+              <div class="action-rationale">${a.rationale || ''}</div>
+            </div>
+          </div>
+          <div class="action-metrics-block">
+            <div style="text-align:right;">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;">Value</div>
+              <div class="action-value" id="action-value-${i}">${a.taskValue || '$0'}</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-top:6px;">Cost</div>
+              <div class="action-hours" id="action-cost-${i}">$${implCost.toLocaleString()}</div>
+            </div>
+            <div class="status-toggle">
+              <button class="status-btn ${statusClass === 'Complete' ? 'active-Complete' : ''}" onclick="setActionStatus(${i}, 'Complete')">🟢 Complete</button>
+              <button class="status-btn ${statusClass === 'In-Progress' ? 'active-In-Progress' : ''}" onclick="setActionStatus(${i}, 'In Progress')">🟡 In Progress</button>
+              <button class="status-btn ${statusClass === 'Planned' ? 'active-Planned' : ''}" onclick="setActionStatus(${i}, 'Planned')">🔴 Planned</button>
+            </div>
+          </div>
+        </div>
+        <!-- Per-task overrides -->
+        <div class="task-overrides">
+          <div class="task-override-field" style="flex:2;">
+            <label>Pay Rate — <span id="task-rate-label-${i}">$${defaultRate}/hr</span></label>
+            <input type="range" id="task-rate-slider-${i}" min="10" max="200" step="1" value="${defaultRate}"
+              oninput="updateTaskRateLabel(${i}); updateTaskCost(${i})">
+            <div class="calc-range-row"><span>$10</span><span>$65 Mid</span><span>$200</span></div>
+          </div>
+          <div class="task-override-field">
+            <label>Headcount</label>
+            <input type="number" id="task-headcount-${i}" value="${defaultHeadcount}" min="1" max="50"
+              class="task-number" oninput="updateTaskCost(${i})">
+          </div>
+          <div class="task-override-field">
+            <label>Hrs to Complete</label>
+            <input type="number" id="task-hours-${i}" value="${a.hoursToComplete || 0}" min="0" max="1000"
+              class="task-number" oninput="updateTaskHours(${i}, this.value)">
+          </div>
+        </div>
+        <div class="action-notes-row">
+          <textarea class="notes-field" id="action-note-${i}" placeholder="Add notes..." onchange="saveNote(${i})" onkeyup="saveNote(${i})">${savedNote}</textarea>
+        </div>
+      </div>`;
+  }
+
+  function getTaskRate(index) {
+    const el = document.getElementById('task-rate-slider-' + index);
+    if (el) return parseFloat(el.value) || calcRate;
+    return calcRate;
+  }
+
+  function getTaskHeadcount(index) {
+    const el = document.getElementById('task-headcount-' + index);
+    if (el) return parseFloat(el.value) || 1;
+    return parseFloat(document.getElementById('calc-headcount')?.value) || 1;
+  }
+
+  function getTaskHours(index) {
+    const el = document.getElementById('task-hours-' + index);
+    if (el) return parseFloat(el.value) || 0;
+    return rawActionItems[index]?.hoursToComplete || 0;
+  }
+
+  function updateTaskHours(index, val) {
+    if (rawActionItems[index]) rawActionItems[index].hoursToComplete = parseFloat(val) || 0;
+    updateTaskCost(index);
+  }
+
+  function updateTaskRateLabel(index) {
+    const el = document.getElementById('task-rate-slider-' + index);
+    if (!el) return;
+    const val = parseInt(el.value);
+    const labelEl = document.getElementById('task-rate-label-' + index);
+    if (labelEl) labelEl.textContent = `$${val}/hr`;
+    updateTaskCost(index);
+  }
+
+  function updateTaskCost(index) {
+    const rate = getTaskRate(index);
+    const headcount = getTaskHeadcount(index);
+    const hours = getTaskHours(index);
+    const multiplier = parseFloat(document.getElementById('calc-multiplier')?.value) || 1.0;
+    const cost = Math.round((hours * rate * headcount * multiplier) / 50) * 50;
+    const costEl = document.getElementById('action-cost-' + index);
+    if (costEl) costEl.textContent = '$' + cost.toLocaleString();
+    recalculate();
+  }
+
+  function setActionStatus(index, newStatus) {
+    const statusClass = newStatus.replace(' ', '-');
+    const item = document.getElementById('action-' + index);
+    if (!item) return;
+    item.className = 'action-item status-' + statusClass;
+    const light = document.getElementById('light-' + index);
+    light.className = 'action-light light-' + statusClass;
+    item.querySelectorAll('.status-btn').forEach(btn => {
+      btn.className = 'status-btn';
+      if ((newStatus === 'Complete' && btn.textContent.includes('Complete')) ||
+          (newStatus === 'In Progress' && btn.textContent.includes('In Progress')) ||
+          (newStatus === 'Planned' && btn.textContent.includes('Planned'))) {
+        btn.className = 'status-btn active-' + statusClass;
+      }
+    });
+  }
+
+  function saveNote(index) {
+    const noteEl = document.getElementById('action-note-' + index);
+    if (noteEl) {
+      actionNotes['action-note-' + index] = noteEl.value;
+    }
+  }
+
+  function clearSession() {
+    if (confirm('Clear this session?')) {
+      sessionReports = [];
+      actionNotes = {};
+      currentReportData = null;
+      rawActionItems = [];
+      displaySessionReports();
+      document.getElementById('section-summary').style.display = 'none';
+      document.getElementById('section-calculator').style.display = 'none';
+      document.getElementById('section-recap').style.display = 'none';
+      document.getElementById('section-innovation').style.display = 'none';
+      document.getElementById('section-actions').style.display = 'none';
+      document.getElementById('export-row').style.display = 'none';
+      setStatus('Session cleared', '');
+    }
+  }
+
+  function exportPDF() {
+    document.getElementById('export-row').style.display = 'none';
+    document.querySelectorAll('.btn-row').forEach(el => el.style.display = 'none');
+    document.getElementById('status-bar').style.display = 'none';
+    window.print();
+    setTimeout(() => {
+      document.getElementById('export-row').style.display = 'flex';
+      document.querySelectorAll('.btn-row').forEach(el => el.style.display = 'flex');
+      document.getElementById('status-bar').style.display = 'flex';
+    }, 1000);
+  }
+
+  function shareReport() {
+    const source = document.getElementById('out-source').textContent || 'VOSS Report';
+    const hours = document.getElementById('out-hours').textContent;
+    const projected = document.getElementById('out-projected').textContent;
+    const category = document.getElementById('out-category').textContent;
+    const recap = document.getElementById('out-recap').textContent;
+    const actions = [];
+    document.querySelectorAll('.action-text').forEach(el => actions.push('• ' + el.textContent));
+    const subject = encodeURIComponent('VOSS Report — ' + category);
+    const body = encodeURIComponent(
+      'VOSS VALUE REPORT\n═══════════════════════════\n\n' +
+      source + '\n\nSUMMARY\nHours Saved: ' + hours + '\nProjected Value: ' + projected +
+      '\nCategory: ' + category + '\n\nCHAT SUMMARY\n' + recap +
+      '\n\nACTION PRIORITY LIST\n' + actions.join('\n') +
+      '\n\n─────────────────────────\nGenerated by VOSS Intel — app.vossintel.com'
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }
+</script>
+</body>
+</html>
