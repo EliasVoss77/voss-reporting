@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VOSS Intel — AI Value Reports</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #080b0f;
@@ -51,165 +50,6 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-
-  /* ─── AUTH SCREEN ─── */
-  #auth-screen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #auth-screen::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
-
-  .auth-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  .auth-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-
-  .auth-logo {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
-  .auth-logo h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.4rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-  }
-
-  .auth-logo p {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 6px;
-  }
-
-  .auth-tabs {
-    display: flex;
-    margin-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-    gap: 4px;
-  }
-
-  .auth-tab {
-    flex: 1;
-    padding: 10px;
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all 0.18s;
-  }
-
-  .auth-tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  .auth-form { display: flex; flex-direction: column; gap: 12px; }
-
-  .auth-form input {
-    width: 100%;
-    padding: 11px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .auth-form input::placeholder { color: var(--muted); }
-  .auth-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,122,0.08); }
-
-  .auth-checkbox {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .auth-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    margin-top: 2px;
-    flex-shrink: 0;
-    accent-color: var(--accent);
-    border-radius: 4px;
-  }
-
-  .auth-checkbox a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(0,229,122,0.3); }
-  .auth-checkbox a:hover { border-bottom-color: var(--accent); }
-
-  .auth-btn {
-    padding: 12px;
-    background: var(--accent);
-    color: #030a06;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.18s;
-    margin-top: 4px;
-  }
-
-  .auth-btn:hover { background: #00f285; box-shadow: 0 4px 16px rgba(0,229,122,0.25); transform: translateY(-1px); }
-
-  .auth-message {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    text-align: center;
-    padding: 10px;
-    border-radius: 3px;
-    display: none;
-  }
-
-  .auth-message.success { background: rgba(0,255,136,0.08); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
-  .auth-message.error { background: rgba(255,77,109,0.08); color: var(--danger); border: 1px solid rgba(255,77,109,0.2); }
 
   /* ─── APP LAYOUT ─── */
   #app-screen { display: none; min-height: 100vh; width: 100%; }
@@ -1846,57 +1686,14 @@
 
 
 <!-- ─── PATENT TICKER ─── -->
-<div class="patent-ticker" id="patent-ticker">
+<div class="patent-ticker">
   <div class="patent-ticker-inner">
     <span class="patent-ticker-item"><span class="patent-ticker-dot"></span>Patents Pending — VOSS Intel's Technologies Are Proprietary and Legally Protected.</span>
   </div>
 </div>
 
-<!-- ─── AUTH SCREEN ─── -->
-<div id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <h1>VOSS</h1>
-      <p>Virtual Operating System Synopsis</p>
-    </div>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-      <button class="auth-tab" onclick="switchAuthTab('signup')">Create Account</button>
-    </div>
-
-    <!-- Login Form -->
-    <div id="login-form" class="auth-form">
-      <input type="email" id="login-email" placeholder="Email address"
-        onkeydown="if(event.key==='Enter')handleLogin()" />
-      <input type="password" id="login-password" placeholder="Password"
-        onkeydown="if(event.key==='Enter')handleLogin()" />
-      <div id="login-message" class="auth-message"></div>
-      <button class="auth-btn" onclick="handleLogin()">⚡ Sign In</button>
-      <button onclick="handleForgotPassword()" style="background:transparent;border:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:0.78rem;cursor:pointer;text-align:center;margin-top:4px;padding:4px;" type="button">Forgot password?</button>
-    </div>
-
-    <!-- Signup Form -->
-    <div id="signup-form" class="auth-form" style="display:none;">
-      <input type="text" id="signup-name" placeholder="Full name" />
-      <input type="email" id="signup-email" placeholder="Email address" />
-      <input type="password" id="signup-password" placeholder="Password (min 8 characters)" />
-      <label class="auth-checkbox">
-        <input type="checkbox" id="terms-checkbox" />
-        <span>I agree to the <a href="https://vossintel.com/terms.html" target="_blank">Terms of Service</a> and <a href="https://vossintel.com/privacy.html" target="_blank">Privacy Policy</a></span>
-      </label>
-      <label class="auth-checkbox">
-        <input type="checkbox" id="email-opt-in-checkbox" checked />
-        <span>I'd like to receive product updates and news from VOSS Intel</span>
-      </label>
-      <div id="signup-message" class="auth-message"></div>
-      <button class="auth-btn" onclick="handleSignup()">Create Account</button>
-    </div>
-  </div>
-</div>
-
 <!-- ─── APP SCREEN ─── -->
-<div id="app-screen">
+<div id="app-screen" style="display:block;">
   <button class="sidebar-toggle" onclick="toggleSidebar()">☰ VOSS</button>
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -1908,35 +1705,20 @@
         <div class="sidebar-logo">
           VOSS INTEL
           <span>Virtual Operating System Synopsis</span>
+          <span style="color:var(--accent);font-size:0.6rem;margin-top:4px;letter-spacing:0.08em;">⚡ No Login Required</span>
         </div>
       </div>
 
-      <div class="sidebar-user">
-        <div class="user-avatar" id="user-avatar">—</div>
-        <div class="user-info">
-          <div class="user-email" id="user-email">—</div>
-          <div class="user-plan free" id="user-plan-badge">FREE PLAN</div>
-        </div>
-      </div>
+
 
       <div class="sidebar-section-label">// Actions</div>
       <button class="sidebar-new-btn" onclick="newReport()">⚡ New Report</button>
 
-      <div id="upgrade-banner" class="upgrade-banner">
-        <div class="upgrade-banner-text">⚡ Unlock unlimited reports, history & exports</div>
-        <button class="upgrade-banner-btn" onclick="window.open(UPGRADE_URL,'_blank')">Upgrade to Pro — $19.99/mo</button>
-      </div>
+
 
       <div class="sidebar-section-label">// Report History</div>
-      <div id="history-lock" class="history-lock" style="display:block;">
-        <div class="history-lock-icon">🔒</div>
-        <div class="history-lock-text">Report history is a Pro feature</div>
-        <button class="history-lock-btn" onclick="showUpgradePrompt()">Upgrade to Pro</button>
-      </div>
-      <div id="report-log-section" style="display:none;">
-        <div class="report-log" id="report-log">
-          <div class="report-log-empty">[ NO REPORTS YET ]<br>Submit your first report<br>to begin tracking value</div>
-        </div>
+      <div style="padding:12px 16px;font-family:'Inter',sans-serif;font-size:0.75rem;color:var(--muted);line-height:1.6;">
+        Report history is stored locally this session only.
       </div>
 
       <div class="sidebar-footer">
@@ -1945,8 +1727,7 @@
           <a href="https://vossintel.com/privacy.html" target="_blank">Privacy</a>
           <a href="mailto:service@vossintel.com">Contact</a>
         </div>
-        <button class="signout-btn" onclick="openProfileModal()" style="margin-bottom:6px;border-color:var(--border-light);color:var(--text-secondary);">⚙ Manage Account</button>
-        <button class="signout-btn" onclick="handleSignOut()">↩ Sign Out</button>
+
       </div>
     </aside>
 
@@ -2108,10 +1889,7 @@
               </div>
             </div>
 
-            <div class="calc-pro-teaser" id="calc-pro-teaser">
-              <div class="calc-pro-text">🔒 Pro — Save rate presets, team templates, time horizon modeling</div>
-              <button class="calc-pro-btn" onclick="showUpgradePrompt()">Upgrade to Pro</button>
-            </div>
+
           </div>
         </div>
 
@@ -2207,11 +1985,7 @@
           <button class="btn btn-secondary" id="export-pdf-btn" onclick="exportPDF()">📄 Export PDF</button>
           <button class="btn btn-secondary" onclick="shareReport()">📧 Share via Email</button>
         </div>
-        <!-- Export lock for free users -->
-        <div id="export-lock" class="export-lock-bar" style="display:none;">
-          <span>📄 Export PDF & Share</span>
-          <button class="export-lock-btn" onclick="showUpgradePrompt()">🔒 Pro Feature — Upgrade</button>
-        </div>
+
 
         <!-- Session Reports -->
         <div class="card">
@@ -2244,17 +2018,9 @@
 </style>
 
 <script>
-  // ─── SUPABASE INIT ───
-  const { createClient } = supabase;
-  const sb = createClient(
-    'https://irgbgizvcxsdxosfjswk.supabase.co',
-    'sb_publishable_nnyhOAPaDpWZk_huoANqpA_Mpa3MPSR'
-  );
-
   const WORKER_URL = "https://voss-reporting.eliasvoss77.workers.dev";
   const API_KEY = "voss-dk7x-2f9m-q372";
 
-  let currentUser = null;
   let sessionReports = [];
   let actionNotes = {};
   let currentReportData = null;
@@ -2387,16 +2153,6 @@
     if (rateSlider) rateSlider.addEventListener('input', () => { updateRateLabel(); applyGlobalRateToSection3(); });
   });
 
-
-  function showAuth() {
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('app-screen').style.display = 'none';
-  }
-
-  function showApp() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-  }
 
   // ─── SHARE LINK FETCHER ───
   let parsedConversations = [];
@@ -2624,87 +2380,12 @@
     status.textContent = '✓ Loaded: ' + (convo.title || 'Conversation') + ' (' + text.length.toLocaleString() + ' chars)';
   }
 
-  // ─── AUTH FUNCTIONS ───
-  function switchAuthTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById('login-form').style.display = tab === 'login' ? 'flex' : 'none';
-    document.getElementById('signup-form').style.display = tab === 'signup' ? 'flex' : 'none';
-  }
 
-  function showAuthMessage(formId, msg, type) {
-    const el = document.getElementById(formId + '-message');
-    el.textContent = msg;
-    el.className = 'auth-message ' + type;
-    el.style.display = 'block';
-  }
 
-  async function handleForgotPassword() {
-    const email = document.getElementById('login-email').value.trim();
-    if (!email) {
-      showAuthMessage('login', 'Enter your email address above first', 'error');
-      return;
-    }
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://app.vossintel.com'
-    });
-    if (error) {
-      showAuthMessage('login', error.message, 'error');
-    } else {
-      showAuthMessage('login', '✓ Password reset email sent! Check your inbox.', 'success');
-    }
-  }
 
-  async function handleLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    if (!email || !password) { showAuthMessage('login', 'Please enter email and password', 'error'); return; }
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) showAuthMessage('login', error.message, 'error');
-  }
 
-  async function handleSignup() {
-    const name = document.getElementById('signup-name').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    const terms = document.getElementById('terms-checkbox').checked;
-    const emailOptIn = document.getElementById('email-opt-in-checkbox').checked;
 
-    if (!name || !email || !password) { showAuthMessage('signup', 'Please fill in all fields', 'error'); return; }
-    if (password.length < 8) { showAuthMessage('signup', 'Password must be at least 8 characters', 'error'); return; }
-    if (!terms) { showAuthMessage('signup', 'Please accept the Terms of Service and Privacy Policy', 'error'); return; }
 
-    const { data, error } = await sb.auth.signUp({
-      email, password,
-      options: { data: { full_name: name, email_opt_in: emailOptIn } }
-    });
-
-    if (error) {
-      showAuthMessage('signup', error.message, 'error');
-    } else {
-      // Save opt-in preference to profiles table
-      if (data?.user) {
-        await sb.from('profiles').upsert({
-          id: data.user.id,
-          email: email,
-          full_name: name,
-          email_opt_in: emailOptIn
-        });
-      }
-      showAuthMessage('signup', '✓ Check your email to confirm your account!', 'success');
-    }
-  }
-
-  async function handleSignOut() {
-    try { await sb.auth.signOut(); } catch(e) {}
-    try {
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const k = localStorage.key(i);
-        if (k) localStorage.removeItem(k);
-      }
-    } catch(e) {}
-    window.location.reload();
-  }
 
   // ─── SIDEBAR ───
   function toggleSidebar() {
@@ -2723,210 +2404,16 @@
     window.scrollTo(0, 0);
   }
 
-  // ─── PLAN & USAGE ───
-  let userPlan = 'free';
-  let reportsToday = 0;
-  const FREE_LIMIT = 5;
-  const UPGRADE_URL = 'https://vossintel.lemonsqueezy.com/checkout/buy/41493af2-e6e6-4d54-91a5-bd506b23fcf8';
 
-  const PRO_EMAILS = ['eliasvoss77@gmail.com', 'eliasvoss77@protonmail.com'];
 
-  async function loadUserPlan() {
-    if (!currentUser) return;
 
-    // Owner always pro — no DB check needed
-    if (PRO_EMAILS.includes(currentUser.email)) {
-      userPlan = 'pro';
-      updatePlanUI();
-      return;
-    }
 
-    // Try Supabase — fetch plan + deletion status in one call
-    try {
-      const { data, error } = await sb
-        .from('profiles')
-        .select('plan, report_count_today, report_count_reset, pending_deletion')
-        .eq('id', currentUser.id)
-        .maybeSingle();
 
-      if (!error && data) {
-        // Check pending_deletion — sign out cleanly after app loads
-        if (data.pending_deletion === true) {
-          await sb.auth.signOut();
-          document.getElementById('auth-screen').style.display = 'flex';
-          document.getElementById('app-screen').style.display = 'none';
-          const pt = document.getElementById('patent-ticker');
-          if (pt) pt.style.display = 'block';
-          const msgEl = document.getElementById('login-message');
-          if (msgEl) {
-            msgEl.textContent = 'This account has been deleted. Contact service@vossintel.com to restore it.';
-            msgEl.className = 'auth-message error';
-            msgEl.style.display = 'block';
-          }
-          return;
-        }
 
-        userPlan = data.plan || 'free';
-        const today = new Date().toISOString().split('T')[0];
-        if (data.report_count_reset !== today) {
-          reportsToday = 0;
-        } else {
-          reportsToday = data.report_count_today || 0;
-        }
-      }
-    } catch (e) {
-      userPlan = 'free';
-    }
 
-    updatePlanUI();
-  }
 
-  async function incrementReportCount() {
-    if (!currentUser) return;
-    reportsToday++;
-    const today = new Date().toISOString().split('T')[0];
-    await sb.from('profiles').update({
-      report_count_today: reportsToday,
-      report_count_reset: today
-    }).eq('id', currentUser.id);
-    updatePlanUI();
-  }
 
-  function updatePlanUI() {
-    const planEl = document.getElementById('user-plan-badge');
-    const upgradeBanner = document.getElementById('upgrade-banner');
-    const historyLock = document.getElementById('history-lock');
-    const historySection = document.getElementById('report-log-section');
-    const exportLock = document.getElementById('export-lock');
-    const exportRow = document.getElementById('export-row');
-    const calcTeaser = document.getElementById('calc-pro-teaser');
 
-    // All features free — open access for everyone
-    if (planEl) { planEl.textContent = 'FREE'; planEl.className = 'user-plan pro'; }
-    if (upgradeBanner) upgradeBanner.style.cssText = 'display:none!important';
-    if (historyLock) historyLock.style.cssText = 'display:none!important';
-    if (historySection) historySection.style.cssText = 'display:block!important';
-    if (exportLock) exportLock.style.cssText = 'display:none!important';
-    if (calcTeaser) calcTeaser.style.cssText = 'display:none!important';
-  }
-
-  function canSubmitReport() {
-    return true; // All features free — unlimited reports for everyone
-  }
-
-  function showUpgradePrompt() {
-    document.getElementById('upgrade-modal').classList.add('open');
-  }
-
-  function closeUpgradeModal() {
-    document.getElementById('upgrade-modal').classList.remove('open');
-  }
-
-  // ─── REPORT HISTORY ───
-  async function deleteReport(id, event) {
-    event.stopPropagation();
-    if (!confirm('Delete this report?')) return;
-    const { error } = await sb.from('reports').delete().eq('id', id).eq('user_id', currentUser.id);
-    if (!error) loadReportHistory();
-  }
-
-  async function loadReportHistory() {
-    if (!currentUser) return;
-    if (userPlan !== 'pro') { updatePlanUI(); return; }
-    const { data, error } = await sb
-      .from('reports')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) { console.error('Error loading reports:', error); return; }
-
-    const log = document.getElementById('report-log');
-    if (!log) return;
-
-    if (!data || data.length === 0) {
-      log.innerHTML = '<div class="report-log-empty">[ NO REPORTS YET ]<br>Submit your first report<br>to begin tracking value</div>';
-      return;
-    }
-
-    log.innerHTML = '';
-    data.forEach(r => {
-      const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const item = document.createElement('div');
-      item.className = 'report-log-item';
-      item.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-          <div style="flex:1;min-width:0;">
-            <div class="report-log-category">${r.category || 'Uncategorized'}</div>
-            <div class="report-log-meta">
-              <span class="report-log-value">${r.projected_value || '—'}</span>
-              <span class="report-log-date">${date}</span>
-            </div>
-          </div>
-          <button class="report-log-delete" onclick="deleteReport('${r.id}', event)">✕ Del</button>
-        </div>`;
-      item.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('report-log-delete')) {
-          loadHistoricalReport(r, item);
-        }
-      });
-      log.appendChild(item);
-    });
-  }
-
-  function loadHistoricalReport(r, el) {
-    document.querySelectorAll('.report-log-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-
-    document.getElementById('out-hours').textContent = r.hours_saved ?? '—';
-    document.getElementById('out-cost').textContent = r.chat_value || '—';
-
-    // Split projected value from timeframe
-    const projRaw = r.projected_value ?? '—';
-    const projParts = projRaw.match(/^(\$[\d,]+)\s*(.*)?$/);
-    if (projParts) {
-      document.getElementById('out-projected').textContent = projParts[1];
-      document.getElementById('out-projected-timeframe').textContent = projParts[2] || '';
-    } else {
-      document.getElementById('out-projected').textContent = projRaw;
-      document.getElementById('out-projected-timeframe').textContent = '';
-    }
-
-    document.getElementById('out-category').textContent = r.category ?? '—';
-    document.getElementById('out-ai').textContent = r.ai_contribution ?? '—';
-    document.getElementById('out-human').textContent = r.human_contribution ?? '—';
-    document.getElementById('out-attribution').style.display = 'none';
-    document.getElementById('out-yearly-projection').style.display = 'none';
-    document.getElementById('out-analogues').style.display = 'none';
-    document.getElementById('out-drivers').style.display = 'none';
-    document.getElementById('out-source').textContent = `Source: ${r.name} — ${r.department}`;
-    document.getElementById('section-summary').style.display = 'block';
-    document.getElementById('section-calculator').style.display = 'block';
-
-    document.getElementById('out-recap').textContent = r.chat_recap || '—';
-    document.getElementById('section-recap').style.display = 'block';
-    document.getElementById('section-innovation').style.display = 'none';
-
-    const actionsEl = document.getElementById('out-actions');
-    actionsEl.innerHTML = '';
-    const items = r.action_items || [];
-    rawActionItems = items;
-    items.forEach((a, i) => {
-      const statusClass = (a.status || 'Planned').replace(' ', '-');
-      actionsEl.innerHTML += buildActionItem(a, i, statusClass, '');
-    });
-    document.getElementById('section-actions').style.display = 'block';
-    recalculate();
-
-    // Export available for everyone
-    document.getElementById('export-row').style.display = 'flex';
-    document.getElementById('export-lock').style.display = 'none';
-
-    if (window.innerWidth <= 768) toggleSidebar();
-    window.scrollTo(0, 0);
-    setStatus('✅ Report loaded from history', 'success');
-  }
 
   // ─── FORM & REPORT ───
   document.getElementById('reportForm').addEventListener('submit', function(e) {
@@ -2997,8 +2484,6 @@
 
   async function generateAiReport() {
     if (sessionReports.length === 0) { setStatus('No reports to analyze — submit a report first', 'error'); return; }
-    if (!canSubmitReport()) return;
-
     setStatus('📋 Reading transcript...', 'loading');
     startProgress();
     document.getElementById('section-summary').style.display = 'none';
@@ -3184,31 +2669,7 @@
       // Now recalculate with all action items loaded
       recalculate();
 
-      // Save to Supabase
-      if (currentUser) {
-        const { error: saveError } = await sb.from('reports').insert({
-          user_id: currentUser.id,
-          name: latestReport.name,
-          department: latestReport.department,
-          category: summary.industry || summary.category || 'Uncategorized',
-          hours_saved: summary.hoursSaved || 0,
-          projected_value: summary.projectedBusinessValue || '$0',
-          ai_contribution: (attr.aiContribution || summary.aiContribution || '0') + '%',
-          human_contribution: (attr.humanContribution || summary.humanContribution || '0') + '%',
-          chat_recap: chatRecap,
-          action_items: actionItems,
-          chat_value: summary.chatValue || '$0'
-        });
-        if (saveError) {
-          console.error('Save error:', saveError);
-          setStatus('⚠️ Analysis complete — save failed (' + saveError.message + ')', 'error');
-        } else {
-          await incrementReportCount();
-          loadReportHistory();
-          setStatus('✅ Analysis complete — saved to your profile ✓', 'success');
-        }      } else {
-        setStatus('Analysis complete', 'success');
-      }
+      setStatus('✅ Analysis complete!', 'success');
 
     } catch (err) {
       stopProgress();
@@ -3367,251 +2828,6 @@
     }, 1000);
   }
 
-  // ─── AUTH STATE ───
-  sb.auth.onAuthStateChange(async (event, session) => {
-    currentUser = session?.user || null;
-    if (currentUser) {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app-screen').style.display = 'block';
-      const pt = document.getElementById('patent-ticker'); if (pt) pt.style.display = 'none';
-      document.getElementById('app-screen').style.minHeight = '100vh';
-      document.getElementById('user-email').textContent = currentUser.email;
-      document.getElementById('user-avatar').textContent = (currentUser.email?.[0] || '?').toUpperCase();
-      await loadUserPlan();
-      loadReportHistory();
-    } else {
-      document.getElementById('auth-screen').style.display = 'flex';
-      document.getElementById('app-screen').style.display = 'none';
-      userPlan = 'free';
-      reportsToday = 0;
-      const pt2 = document.getElementById('patent-ticker'); if (pt2) pt2.style.display = 'block';
-    }
-  });
-
-  // ─── PASSWORD RECOVERY DETECTION ───────────────────────────────────────────
-  // Detects Supabase recovery token in URL hash on page load
-  // Keeps onAuthStateChange completely untouched
-
-  (function checkPasswordRecovery() {
-    const hash = window.location.hash;
-    if (!hash.includes('type=recovery')) return;
-
-    // Recovery token present — wait for Supabase to process it
-    // then show the set-password modal
-    const showRecoveryModal = () => {
-      const modal = document.getElementById('set-password-modal');
-      if (modal) {
-        modal.classList.add('open');
-        // Clear the hash so refresh doesn't re-trigger
-        history.replaceState({}, '', window.location.pathname);
-      }
-    };
-
-    // Give Supabase ~1s to process the token and fire auth state change
-    setTimeout(showRecoveryModal, 1000);
-  })();
-
-  // ─── VOSS EXTENSION RELAY ───────────────────────────────────────────────────
-  // Reads conversation written by the browser extension and auto-fills the form
-
-  function handleExtensionRelay(relay) {
-    if (!relay || !relay.conversation || relay.source !== 'extension') return;
-    if (Date.now() - relay.timestamp > 5 * 60 * 1000) {
-      localStorage.removeItem('voss_extension_relay');
-      return;
-    }
-    const applyRelay = () => {
-      const textarea = document.getElementById('rep-issue');
-      if (!textarea) return;
-      textarea.value = relay.conversation;
-      const nameField = document.getElementById('rep-name');
-      const deptField = document.getElementById('rep-department');
-      if (relay.name && nameField) nameField.value = relay.name;
-      if (relay.department && deptField) deptField.value = relay.department;
-      const platformNames = {
-        claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini',
-        copilot: 'Copilot', perplexity: 'Perplexity', grok: 'Grok', word: 'Microsoft Word'
-      };
-      const platformLabel = platformNames[relay.platform] || relay.platform || 'AI platform';
-      setStatus('✅ Conversation imported from ' + platformLabel + ' — click VOSS Value Report to analyze', 'success');
-      const zone = document.getElementById('upload-zone');
-      const uploadStatus = document.getElementById('upload-status');
-      if (zone && uploadStatus) {
-        zone.classList.add('success');
-        uploadStatus.textContent = '✓ Imported from ' + platformLabel + ' via VOSS Extension — ' + relay.conversation.length.toLocaleString() + ' characters';
-      }
-      localStorage.removeItem('voss_extension_relay');
-      history.replaceState({}, '', window.location.pathname);
-    };
-
-    if (currentUser) {
-      applyRelay();
-    } else {
-      let attempts = 0;
-      const poll = setInterval(() => {
-        attempts++;
-        if (currentUser) { clearInterval(poll); applyRelay(); }
-        else if (attempts > 20) clearInterval(poll);
-      }, 500);
-    }
-  }
-
-  // On page load — check for relay data written by background script
-  (function checkRelayOnLoad() {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.has('voss_import')) return;
-    setTimeout(() => {
-      try {
-        const raw = localStorage.getItem('voss_extension_relay');
-        if (raw) handleExtensionRelay(JSON.parse(raw));
-      } catch(e) {}
-    }, 800);
-  })();
-
-  // Also listen for direct event fired by background bridge
-  window.addEventListener('voss_extension_data', (e) => {
-    if (e.detail) handleExtensionRelay(e.detail);
-  });
-
-
-  // ─── PROFILE & ACCOUNT MANAGEMENT ───
-
-  function openProfileModal() {
-    const modal = document.getElementById('profile-modal');
-    if (!modal) return;
-    const nameEl = document.getElementById('profile-name');
-    const emailEl = document.getElementById('profile-email');
-    if (nameEl && currentUser) nameEl.value = currentUser.user_metadata?.full_name || '';
-    if (emailEl && currentUser) emailEl.value = currentUser.email || '';
-    ['profile-save-msg','profile-reset-msg','profile-delete-msg'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = '';
-    });
-    const confirmRow = document.getElementById('delete-confirm-row');
-    const deleteBtn = document.getElementById('delete-account-btn');
-    if (confirmRow) confirmRow.style.display = 'none';
-    if (deleteBtn) deleteBtn.style.display = 'block';
-    modal.classList.add('open');
-  }
-
-  function closeProfileModal() {
-    const modal = document.getElementById('profile-modal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  async function saveProfile() {
-    const name = document.getElementById('profile-name').value.trim();
-    const msgEl = document.getElementById('profile-save-msg');
-    if (!name) {
-      msgEl.style.color = 'var(--danger)';
-      msgEl.textContent = 'Name cannot be empty';
-      return;
-    }
-    try {
-      const { error: authError } = await sb.auth.updateUser({ data: { full_name: name } });
-      const { error: dbError } = await sb.from('profiles').update({ full_name: name }).eq('id', currentUser.id);
-      if (authError || dbError) throw new Error((authError || dbError).message);
-      msgEl.style.color = 'var(--accent)';
-      msgEl.textContent = '✓ Profile updated';
-      const avatar = document.getElementById('user-avatar');
-      if (avatar) avatar.textContent = name[0].toUpperCase();
-    } catch(e) {
-      msgEl.style.color = 'var(--danger)';
-      msgEl.textContent = '✕ ' + e.message;
-    }
-  }
-
-  async function handlePasswordReset() {
-    const msgEl = document.getElementById('profile-reset-msg');
-    if (!currentUser?.email) return;
-    const { error } = await sb.auth.resetPasswordForEmail(currentUser.email, {
-      redirectTo: 'https://app.vossintel.com'
-    });
-    if (error) {
-      msgEl.style.color = 'var(--danger)';
-      msgEl.textContent = '✕ ' + error.message;
-    } else {
-      msgEl.style.color = 'var(--accent)';
-      msgEl.textContent = '✓ Reset email sent — check your inbox';
-    }
-  }
-
-  function showDeleteConfirm() {
-    const confirmRow = document.getElementById('delete-confirm-row');
-    const deleteBtn = document.getElementById('delete-account-btn');
-    if (confirmRow) confirmRow.style.display = 'flex';
-    if (deleteBtn) deleteBtn.style.display = 'none';
-    const input = document.getElementById('delete-confirm-input');
-    if (input) { input.value = ''; input.focus(); }
-  }
-
-  async function confirmDeleteAccount() {
-    const input = document.getElementById('delete-confirm-input').value.trim();
-    const msgEl = document.getElementById('profile-delete-msg');
-    if (input !== 'DELETE') {
-      msgEl.textContent = 'Type DELETE exactly to confirm';
-      return;
-    }
-    try {
-      msgEl.textContent = 'Processing...';
-
-      // Flag account as pending deletion — blocks re-login
-      await sb.from('profiles').update({
-        pending_deletion: true,
-        deletion_requested_at: new Date().toISOString()
-      }).eq('id', currentUser.id);
-
-      // Call worker to hard-delete the auth user server-side
-      await fetch(WORKER_URL + '/delete-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-        body: JSON.stringify({ userId: currentUser.id })
-      });
-
-      // Sign out client-side
-      await sb.auth.signOut();
-      closeProfileModal();
-      alert('Your account has been deleted. Your data will be retained for 30 days — contact service@vossintel.com to restore it.');
-      window.location.reload();
-
-    } catch(e) {
-      msgEl.textContent = '✕ ' + e.message;
-      setTimeout(async () => {
-        await sb.auth.signOut();
-        window.location.reload();
-      }, 2000);
-    }
-  }
-
-  async function submitNewPassword() {
-    const pw = document.getElementById('new-password-input').value;
-    const pw2 = document.getElementById('new-password-confirm').value;
-    const msgEl = document.getElementById('set-password-msg');
-    if (pw.length < 8) {
-      msgEl.style.color = 'var(--danger)';
-      msgEl.textContent = 'Password must be at least 8 characters';
-      return;
-    }
-    if (pw !== pw2) {
-      msgEl.style.color = 'var(--danger)';
-      msgEl.textContent = 'Passwords do not match';
-      return;
-    }
-    msgEl.style.color = 'var(--accent2)';
-    msgEl.textContent = 'Updating...';
-    const { error } = await sb.auth.updateUser({ password: pw });
-    if (error) {
-      msgEl.style.color = 'var(--danger)';
-      msgEl.textContent = '✕ ' + error.message;
-    } else {
-      msgEl.style.color = 'var(--accent)';
-      msgEl.textContent = '✓ Password updated successfully!';
-      setTimeout(() => {
-        document.getElementById('set-password-modal').classList.remove('open');
-        history.replaceState({}, '', window.location.pathname);
-      }, 1500);
-    }
-  }
 
   function shareReport() {
     const source = document.getElementById('out-source').textContent || 'VOSS Report';
@@ -3633,86 +2849,6 @@
   }
 </script>
 
-<!-- Set New Password Modal -->
-<div class="modal-overlay" id="set-password-modal">
-  <div class="modal" style="max-width:420px;">
-    <div class="modal-title">// Set New Password</div>
-    <div class="modal-body">
-      <p style="margin-bottom:16px;color:var(--muted);font-size:0.85rem;line-height:1.6;">Enter your new password below. It must be at least 8 characters.</p>
-      <input type="password" id="new-password-input" placeholder="New password (min 8 characters)" class="profile-input">
-      <input type="password" id="new-password-confirm" placeholder="Confirm new password" class="profile-input">
-      <div id="set-password-msg" class="profile-msg"></div>
-      <button onclick="submitNewPassword()" class="profile-action-btn profile-save-btn" style="margin-top:8px;">Set New Password</button>
-    </div>
-  </div>
-</div>
 
-<!-- Profile & Account Modal -->
-<div class="modal-overlay" id="profile-modal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-title">// Account & Profile</div>
-    <div class="modal-body">
-
-      <!-- Profile Info -->
-      <div class="profile-section-label">Profile Info</div>
-      <input type="text" id="profile-name" placeholder="Full name" class="profile-input">
-      <input type="email" id="profile-email" placeholder="Email address" class="profile-input" disabled>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px;">Email cannot be changed — contact service@vossintel.com</div>
-      <button onclick="saveProfile()" class="profile-action-btn profile-save-btn">Save Changes</button>
-      <div id="profile-save-msg" class="profile-msg"></div>
-
-      <hr class="profile-divider">
-
-      <!-- Password -->
-      <div class="profile-section-label">Password</div>
-      <button onclick="handlePasswordReset()" class="profile-action-btn profile-reset-btn">Send Password Reset Email</button>
-      <div id="profile-reset-msg" class="profile-msg"></div>
-
-      <hr class="profile-divider">
-
-      <!-- Danger Zone -->
-      <div class="danger-label">Danger Zone</div>
-      <div class="danger-note">Deleting your account is permanent. Your data will be retained for 30 days — contact service@vossintel.com within that window to restore it.</div>
-      <div id="delete-confirm-row" style="display:none;flex-direction:column;gap:8px;margin-bottom:8px;">
-        <input type="text" id="delete-confirm-input" placeholder="Type DELETE to confirm" class="profile-input" style="background:rgba(248,113,113,0.05);border-color:rgba(248,113,113,0.3);font-family:'JetBrains Mono',monospace;">
-        <button onclick="confirmDeleteAccount()" class="profile-action-btn profile-confirm-btn">Permanently Delete My Account</button>
-      </div>
-      <button id="delete-account-btn" onclick="showDeleteConfirm()" class="profile-action-btn profile-delete-btn">Delete My Account</button>
-      <div id="profile-delete-msg" class="profile-msg" style="color:var(--danger);"></div>
-
-    </div>
-    <button class="modal-close" onclick="closeProfileModal()">✕ Close</button>
-  </div>
-</div>
-
-<!-- Upgrade Modal -->
-<div class="modal-overlay" id="upgrade-modal">
-  <div class="modal" style="max-width:420px;">
-    <div class="modal-title">⚡ Upgrade to VOSS Pro</div>
-    <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:14px;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:var(--muted);margin-bottom:8px;">FREE</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:10px;">$0/mo</div>
-          <div style="font-size:0.78rem;color:var(--muted);line-height:1.8;">
-            5 reports/day<br>Full report output<br>In-app view only<br><span style="opacity:0.4;">No history</span><br><span style="opacity:0.4;">No export</span>
-          </div>
-        </div>
-        <div style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.3);border-radius:3px;padding:14px;position:relative;">
-          <div style="position:absolute;top:-10px;right:10px;background:var(--accent);color:#000;font-family:'JetBrains Mono',monospace;font-size:0.6rem;padding:2px 8px;border-radius:2px;font-weight:700;">BEST VALUE</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:var(--accent);margin-bottom:8px;">PRO</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:10px;">$19.99/mo</div>
-          <div style="font-size:0.78rem;color:var(--text);line-height:1.8;">
-            Unlimited reports<br>Full report output<br>Export PDF<br>Report history<br>Priority processing
-          </div>
-        </div>
-      </div>
-      <a href="https://vossintel.lemonsqueezy.com/checkout/buy/41493af2-e6e6-4d54-91a5-bd506b23fcf8" target="_blank" style="display:block;background:var(--accent);color:#000;text-align:center;padding:14px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:0.85rem;letter-spacing:0.1em;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='#00cc6a'" onmouseout="this.style.background='var(--accent)'">
-        UPGRADE TO PRO — $19.99/MONTH
-      </a>
-    </div>
-    <button class="modal-close" onclick="closeUpgradeModal()">✕ Maybe later</button>
-  </div>
-</div>
 </body>
 </html>
