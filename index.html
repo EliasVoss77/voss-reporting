@@ -299,17 +299,7 @@
     position: relative;
   }
 
-  .main-content::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+
 
   .main-inner {
     max-width: 860px;
@@ -1673,77 +1663,6 @@
   }
 
 
-  /* ─── TOP HEADER ─── */
-  .top-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    position: relative;
-  }
-
-  .top-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
-    opacity: 0.4;
-  }
-
-  .top-header-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-  }
-
-  .top-header-logo span {
-    display: block;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.6rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    margin-top: 2px;
-    text-transform: uppercase;
-  }
-
-  .top-header-tagline {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-  }
-
-  .top-header-links {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-
-  .top-header-links a {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .top-header-links a:hover { color: var(--text); }
-
-  @media (max-width: 520px) {
-    .top-header { padding: 12px 16px; }
-    .top-header-tagline { display: none; }
-    .top-header-links { gap: 10px; }
-  }
-
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 </style>
@@ -1762,30 +1681,18 @@
 <div id="app-screen" style="display:block;">
     <!-- TOP HEADER -->
 
-    <!-- TOP HEADER -->
-    <header class="top-header">
-      <div class="top-header-logo">VOSS INTEL</div>
-    </header>
-
-    <!-- MAIN -->
+<!-- MAIN -->
     <main class="main-content">
       <div class="main-inner">
 
-        <!-- Submit Report -->
-        <div class="card">
-          <div class="card-title">Submit Report</div>
-          <form id="reportForm">
-            <div class="form-row">
-              <input type="text" id="rep-name" placeholder="Name" required>
-              <input type="text" id="rep-department" placeholder="Department — Position">
-            </div>
+        <!-- VOSS Logo on bare background -->
+        <div style="text-align:center;padding:40px 0 24px;">
+          <div style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;letter-spacing:0.08em;color:var(--accent);">VOSS INTEL</div>
+        </div>
 
-            <!-- Share Link Input -->
-            <div class="share-coming-soon" style="cursor:pointer;" onclick="window.open('https://app.vossintel.com/voss-extension.zip','_blank')">
-              <span class="share-coming-icon">🔗</span>
-              <span class="share-coming-text">One-click import via the VOSS Browser Extension — capture any AI platform instantly, no copy/paste needed</span>
-              <span class="share-coming-badge" style="background:rgba(0,229,122,0.1);color:var(--accent);border-color:rgba(0,229,122,0.3);cursor:pointer;">⬇ Download Now</span>
-            </div>
+        <!-- Submit Report Card -->
+        <div class="card" style="max-width:700px;margin:0 auto 20px;">
+          <form id="reportForm">
 
             <!-- File Upload Zone -->
             <div class="upload-zone" id="upload-zone"
@@ -1801,22 +1708,32 @@
             <input type="file" id="file-input" accept=".pdf,.txt,.md,.json,.html"
               style="display:none" onchange="handleFileSelect(event)">
 
-            <!-- JSON Conversation Picker (shows when multi-chat JSON detected) -->
+            <!-- JSON Conversation Picker -->
             <div id="json-picker" style="display:none;" class="json-picker">
               <div class="json-picker-label">// Select conversation to analyze</div>
-              <select id="json-conversation-select" class="task-select" style="width:100%;margin-bottom:10px;">
-              </select>
+              <select id="json-conversation-select" class="task-select" style="width:100%;margin-bottom:10px;"></select>
               <button type="button" class="btn btn-secondary" style="width:100%;" onclick="loadSelectedConversation()">Load Selected Conversation</button>
             </div>
 
-            <textarea id="rep-issue" placeholder="Paste chat transcript here, upload a file, or use a share link above..." required></textarea>
+            <textarea id="rep-issue" placeholder="Paste chat transcript here or upload a file above..." required></textarea>
             <button type="submit" class="btn btn-primary">Submit Report</button>
+
             <div style="text-align:center;margin-top:10px;font-family:'Inter',sans-serif;font-size:0.72rem;color:var(--muted);line-height:1.6;">
               By submitting a report you agree to our
               <a href="https://vossintel.com/terms.html" target="_blank" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(0,229,122,0.3);">Terms of Service</a>
               and
               <a href="https://vossintel.com/privacy.html" target="_blank" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(0,229,122,0.3);">Privacy Policy</a>
             </div>
+
+            <div style="text-align:center;margin-top:12px;">
+              <a href="https://app.vossintel.com/voss-extension.zip"
+                style="display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--accent2);text-decoration:none;padding:8px 16px;border:1px solid rgba(56,189,248,0.3);border-radius:var(--radius-sm);transition:all 0.2s;"
+                onmouseover="this.style.background='rgba(56,189,248,0.08)'"
+                onmouseout="this.style.background='transparent'">
+                🔗 Download VOSS Browser Extension
+              </a>
+            </div>
+
           </form>
         </div>
 
@@ -2182,6 +2099,11 @@
     if (modal) modal.addEventListener('click', function(e) {
       if (e.target === this) closeFormulaModal();
     });
+    // Wire up reportForm safely
+    const rf = document.getElementById('reportForm');
+    if (rf && !rf._vossWired) {
+      rf._vossWired = true;
+    }
     const slider = document.getElementById('calc-multiplier');
     if (slider) slider.addEventListener('input', () => { applyMultiplierToSection3(); });
     const rateSlider = document.getElementById('calc-rate-slider');
@@ -2447,14 +2369,14 @@
   document.getElementById('reportForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const report = {
-      name: document.getElementById('rep-name').value,
-      department: document.getElementById('rep-department').value,
+      name: '',
+      department: '',
       text: document.getElementById('rep-issue').value
     };
     sessionReports.push(report);
     displaySessionReports();
     document.getElementById('reportForm').reset();
-    setStatus(`Report from ${report.name} submitted successfully`, 'success');
+    setStatus('Report submitted successfully', 'success');
   });
 
   function displaySessionReports() {
