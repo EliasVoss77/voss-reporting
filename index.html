@@ -2166,22 +2166,7 @@
   });
 
   function displaySessionReports() {
-    const container = document.getElementById('reports');
-    if (sessionReports.length === 0) {
-      container.innerHTML = '<div class="empty-state">[ NO REPORTS THIS SESSION ]</div>';
-      return;
-    }
-    container.innerHTML = '';
-    sessionReports.forEach(r => {
-      container.innerHTML += `
-        <div class="report-item">
-          <div class="report-meta">
-            <span class="report-name">${r.name}</span>
-            <span class="report-dept">${r.department}</span>
-          </div>
-          <div class="report-preview">${r.text.substring(0, 120)}...</div>
-        </div>`;
-    });
+    // Session reports UI removed — reports generate directly
   }
 
   function setStatus(msg, type = '') {
