@@ -2223,7 +2223,6 @@
     };
     sessionReports.push(report);
     displaySessionReports();
-    document.getElementById('reportForm').reset();
     setStatus('Report submitted!', 'success');
     const src = document.getElementById('session-reports-card');
     if (src) src.style.display = 'block';
@@ -2283,7 +2282,12 @@
   }
 
   async function generateAiReport() {
-    if (sessionReports.length === 0) { setStatus('No reports to analyze — submit a report first', 'error'); return; }
+    // Auto-submit current textarea content if not already submitted
+    const currentText = document.getElementById('rep-issue')?.value?.trim();
+    if (sessionReports.length === 0 && currentText && currentText.length > 10) {
+      sessionReports.push({ name: '', department: '', text: currentText });
+    }
+    if (sessionReports.length === 0) { setStatus('No content to analyze — paste a transcript or upload a file first', 'error'); return; }
     if (!canSubmitReport()) return;
 
     setStatus('📋 Reading transcript...', 'loading');
