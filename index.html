@@ -1964,10 +1964,10 @@
             </div>
 
             <!-- Share Link Input -->
-            <div class="share-coming-soon">
+            <div class="share-coming-soon" style="cursor:pointer;" onclick="window.open('https://app.vossintel.com/voss-extension.zip','_blank')">
               <span class="share-coming-icon">🔗</span>
-              <span class="share-coming-text">One-click import via the VOSS Browser Extension — no copy/paste needed</span>
-              <span class="share-coming-badge" style="background:rgba(0,229,122,0.1);color:var(--accent);border-color:rgba(0,229,122,0.3);">✓ Available Now</span>
+              <span class="share-coming-text">One-click import via the VOSS Browser Extension — capture any AI platform instantly, no copy/paste needed</span>
+              <span class="share-coming-badge" style="background:rgba(0,229,122,0.1);color:var(--accent);border-color:rgba(0,229,122,0.3);cursor:pointer;">⬇ Download Now</span>
             </div>
 
             <!-- File Upload Zone -->
@@ -2793,39 +2793,19 @@
     const historySection = document.getElementById('report-log-section');
     const exportLock = document.getElementById('export-lock');
     const exportRow = document.getElementById('export-row');
+    const calcTeaser = document.getElementById('calc-pro-teaser');
 
-    if (userPlan === 'pro') {
-      if (planEl) { planEl.textContent = 'PRO'; planEl.className = 'user-plan pro'; }
-      if (upgradeBanner) upgradeBanner.style.cssText = 'display:none!important';
-      if (historyLock) historyLock.style.cssText = 'display:none!important';
-      if (historySection) historySection.style.cssText = 'display:block!important';
-      // Export shown when report is ready — handled by generateAiReport
-      if (exportLock) exportLock.style.cssText = 'display:none!important';
-      const calcTeaser = document.getElementById('calc-pro-teaser');
-      if (calcTeaser) calcTeaser.style.cssText = 'display:none!important';
-    } else {
-      const remaining = Math.max(0, FREE_LIMIT - reportsToday);
-      if (planEl) {
-        planEl.textContent = `FREE — ${remaining}/${FREE_LIMIT} today`;
-        planEl.className = 'user-plan free';
-      }
-      if (upgradeBanner) upgradeBanner.style.cssText = 'display:block!important';
-      if (historyLock) historyLock.style.cssText = 'display:block!important';
-      if (historySection) historySection.style.cssText = 'display:none!important';
-      // Show export lock instead of export buttons
-      if (exportLock) exportLock.style.cssText = 'display:flex!important';
-      if (exportRow) exportRow.style.cssText = 'display:none!important';
-    }
+    // All features free — open access for everyone
+    if (planEl) { planEl.textContent = 'FREE'; planEl.className = 'user-plan pro'; }
+    if (upgradeBanner) upgradeBanner.style.cssText = 'display:none!important';
+    if (historyLock) historyLock.style.cssText = 'display:none!important';
+    if (historySection) historySection.style.cssText = 'display:block!important';
+    if (exportLock) exportLock.style.cssText = 'display:none!important';
+    if (calcTeaser) calcTeaser.style.cssText = 'display:none!important';
   }
 
   function canSubmitReport() {
-    if (userPlan === 'pro') return true;
-    if (reportsToday >= FREE_LIMIT) {
-      setStatus(`Daily limit reached (${FREE_LIMIT}/day on Free plan) — Upgrade to Pro for unlimited reports`, 'error');
-      showUpgradePrompt();
-      return false;
-    }
-    return true;
+    return true; // All features free — unlimited reports for everyone
   }
 
   function showUpgradePrompt() {
@@ -2933,13 +2913,9 @@
     document.getElementById('section-actions').style.display = 'block';
     recalculate();
 
-    if (userPlan === 'pro') {
-      document.getElementById('export-row').style.display = 'flex';
-      document.getElementById('export-lock').style.display = 'none';
-    } else {
-      document.getElementById('export-row').style.display = 'none';
-      document.getElementById('export-lock').style.display = 'flex';
-    }
+    // Export available for everyone
+    document.getElementById('export-row').style.display = 'flex';
+    document.getElementById('export-lock').style.display = 'none';
 
     if (window.innerWidth <= 768) toggleSidebar();
     window.scrollTo(0, 0);
@@ -3195,14 +3171,9 @@
       });
       document.getElementById('section-actions').style.display = 'block';
 
-      // Show export — Pro gets buttons, Free gets lock
-      if (userPlan === 'pro') {
-        document.getElementById('export-row').style.display = 'flex';
-        document.getElementById('export-lock').style.display = 'none';
-      } else {
-        document.getElementById('export-row').style.display = 'none';
-        document.getElementById('export-lock').style.display = 'flex';
-      }
+      // Export available for everyone
+      document.getElementById('export-row').style.display = 'flex';
+      document.getElementById('export-lock').style.display = 'none';
 
       // Now recalculate with all action items loaded
       recalculate();
@@ -3453,8 +3424,7 @@
       if (relay.department && deptField) deptField.value = relay.department;
       const platformNames = {
         claude: 'Claude', chatgpt: 'ChatGPT', gemini: 'Gemini',
-        copilot: 'Copilot', perplexity: 'Perplexity', grok: 'Grok', word: 'Microsoft Word',
-        office365: 'Microsoft 365', suno: 'Suno', quickbooks: 'QuickBooks'
+        copilot: 'Copilot', perplexity: 'Perplexity', grok: 'Grok', word: 'Microsoft Word'
       };
       const platformLabel = platformNames[relay.platform] || relay.platform || 'AI platform';
       setStatus('✅ Conversation imported from ' + platformLabel + ' — click VOSS Value Report to analyze', 'success');
