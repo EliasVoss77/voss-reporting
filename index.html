@@ -1941,7 +1941,7 @@
 
 
         <!-- Session Reports -->
-        <div class="card">
+        <div class="card" id="session-reports-card" style="display:none;">
           <div class="card-title">Session Reports</div>
           <div id="reports"><div class="empty-state">[ NO REPORTS THIS SESSION ]</div></div>
         </div>
@@ -2377,6 +2377,8 @@
     displaySessionReports();
     document.getElementById('reportForm').reset();
     setStatus('Report submitted successfully', 'success');
+    const src = document.getElementById('session-reports-card');
+    if (src) src.style.display = 'block';
   });
 
   function displaySessionReports() {
